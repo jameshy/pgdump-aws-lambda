@@ -1,0 +1,30 @@
+{
+  "name": "pgdump-aws-lambda",
+  "version": "0.0.0",
+  "description": "Lambda function for executing pg_dump and streaming the output to s3.",
+  "main": "index.js",
+  "dependencies": {
+    "string-format": "^0.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jameshy/pgdump-aws-lambda.git"
+  },
+  "keywords": [
+    "lambda",
+    "s3",
+    "pg_dump",
+    "postgresql",
+    "backup"
+  ],
+  "author": "James Hutchby",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jameshy/pgdump-aws-lambda/issues"
+  },
+  "homepage": "https://github.com/jameshy/pgdump-aws-lambda#readme"
+}
