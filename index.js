@@ -21,7 +21,8 @@ function uploadToS3(env, readStream, key, cb) {
     console.log('streaming to s3 bucket={}, key={}'.format(env.S3_BUCKET, key))
     var s3Obj = new AWS.S3({params: {
         Bucket: env.S3_BUCKET,
-        Key: key
+        Key: key,
+        ACL: 'bucket-owner-full-control'
     }})
 
     s3Obj.upload({Body: readStream})
