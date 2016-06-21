@@ -6,4 +6,4 @@ if [ -f $file ] ; then
     rm $file
 fi
 
-zip -r $file .
+zip -x *.git* -r $file .
