@@ -1,14 +1,13 @@
-require('string-format').extend(String.prototype)
-
+// string formatting library
+const format = require('string-format')
 const AWS = require('aws-sdk')
 const spawn = require('child_process').spawn
 const path = require('path')
 const moment = require('moment')
 const through2 = require('through2')
 
-// configure aws
+// configure AWS to log to stdout
 AWS.config.update({
-    region: 'eu-west-1',
     logger: process.stdout
 })
 
@@ -18,7 +17,7 @@ var PG_DUMP_ENV = {
 }
 
 function uploadToS3(env, readStream, key, cb) {
-    console.log('streaming to s3 bucket={}, key={}'.format(env.S3_BUCKET, key))
+    console.log(format('streaming to s3 bucket={}, key={} region={}', env.S3_BUCKET, key, env.S3_REGION))
     var s3Obj = new AWS.S3({params: {
         Bucket: env.S3_BUCKET,
         Key: key,
@@ -32,27 +31,33 @@ function uploadToS3(env, readStream, key, cb) {
             cb(err)
         }
         else {
-            console.log("Uploaded the file at", data.Location)
+            console.log('Uploaded the file at', data.Location)
             cb(null)
         }
     })
 }
 
+/*
+Invokes bin/pg_dump binary with configured environment variables
+streaming the output to s3
+*/
 exports.handler = function(event, context, cb) {
-    // prepare environment variables for pg_dump
+    // using variables from the lambda event, prepare environment variables for pg_dump
     var env = Object.assign({}, PG_DUMP_ENV, event)
-    var stderr = ''
+
+    // use the region provided by the event or default to eu-west-1
+    env.S3_REGION = env.S3_REGION || 'eu-west-1'
 
     if (!env.PGDATABASE || !env.S3_BUCKET) {
         return cb('configuration not found in the event data')
     }
 
-    // the filename of our backup file
+    // determine the filename for our dump file, using the current date
     var timestamp = moment().format('DD-MM-YYYY@HH-mm-ss')
     var day = moment().format('YYYY-MM-DD')
-    var filename = '{}-{}.backup'.format(env.PGDATABASE, timestamp)
+    var filename = format('{}-{}.backup', env.PGDATABASE, timestamp)
 
-    // the s3 key (includes directory)
+    // determine the s3 key (includes directory)
     var subkey = env.SUBKEY || ''
     var key = path.join(subkey, day, filename)
 
@@ -61,11 +66,13 @@ exports.handler = function(event, context, cb) {
         env: env
     })
 
-    // capture stderr for printing when pg_dump return code != 0
+    // capture stderr for printing when pg_dump fails
+    var stderr = ''
     pgDumpProcess.stderr.on('data', (data) => {
         stderr += data.toString('utf8')
     })
 
+    // check for errors when pg_dump finishes
     pgDumpProcess.on('close', (code) => {
         if (code === 1) {
             return cb(new Error('pg_dump process failed: {}'.format(stderr)))
@@ -76,15 +83,18 @@ exports.handler = function(event, context, cb) {
     })
 
     var pgDumpStarted
+
+    // check the first few bytes to check we have a valid stream
+    // then pipe the rest directly to s3
     var buffer = through2(function (chunk, enc, callback) {
         this.push(chunk)
-        // if stdout begins with PGDMP, we know pg_dump is going strong, so continue with dumping
+        // if stdout begins with 'PGDMP', we know pg_dump is going strong, so continue with dumping
         // we assume that the first chunk is large enough to contain PGDMP under all circumstances
         if (!pgDumpStarted && chunk.toString('utf8').startsWith('PGDMP')) {
             pgDumpStarted = true
             uploadToS3(env, buffer, key, function(err, result) {
                 if (!err) {
-                    var msg = 'sucessfully dumped {} to {}'.format(env.PGDATABASE, key)
+                    var msg = format('successfully dumped {} to {}', env.PGDATABASE, key)
                     console.log(msg)
                     return cb(null, msg)
                 }
@@ -105,7 +115,7 @@ exports.handler = function(event, context, cb) {
 //     PGDATABASE: 'my-database',
 //     PGUSER: 'postgres',
 //     PGPASSWORD: 'dev',
-//     PGHOST: 'localhost',
+//     PGHOST: 'localhost', 
 //     LD_LIBRARY_PATH: './lib',
 //     SUBKEY: 'testing/',
 //     S3_BUCKET: 'my-database-backups'
