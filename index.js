@@ -14,7 +14,7 @@ AWS.config.update({
 
 // config
 var PG_DUMP_ENV = {
-    LD_LIBRARY_PATH: './lib'
+    LD_LIBRARY_PATH: './bin'
 }
 
 function uploadToS3(env, readStream, key, cb) {
@@ -57,7 +57,7 @@ exports.handler = function(event, context, cb) {
     var key = path.join(subkey, day, filename)
 
     // spawn pg_dump process
-    var pgDumpProcess = spawn('./lib/pg_dump', ['-Fc'], {
+    var pgDumpProcess = spawn('./bin/pg_dump', ['-Fc'], {
         env: env
     })
 
