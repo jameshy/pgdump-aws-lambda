@@ -6,6 +6,9 @@ const path = require('path')
 const moment = require('moment')
 const through2 = require('through2')
 
+// enabling "Method mode" for String.format
+format.extend(String.prototype)
+
 // configure AWS to log to stdout
 AWS.config.update({
     logger: process.stdout
