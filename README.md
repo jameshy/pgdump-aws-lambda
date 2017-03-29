@@ -28,3 +28,15 @@ Using AWS, you can schedule it to run periodically.
 This function will store your backup with the following s3 key:
 
 s3://${S3_BUCKET}/${SUBKEY}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
+
+# Loading your own `pg_dump` binary
+1. spin up Amazon AMI image on EC2 (since the lambda function will run
+   on Amazon AMI image, based off of CentOS, using it would have the
+best chance of being compatiable)
+2. install postgres as normal (current default version is 9.5, but you can find
+   packages on the official postgres site for 9.6)
+3. run `scp -i YOUR-ID.pem ec2-user@AWS_IP:/usr/bin/pg_dump ./bin/` and `scp -i YOUR-ID.pem ec2-user@AWS_UP:/usr/lib64/libpq.so.5.8 ./bin/libpq.so.5`
+
+NOTE: `libpq.so.5.8` is found out by running `ll /usr/lib64/libpq.so.5`
+and looking at where the symlink goes to.
+
