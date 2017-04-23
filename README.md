@@ -1,42 +1,60 @@
 # pgdump-aws-lambda
 
+[![Build Status](https://travis-ci.org/jameshy/pgdump-aws-lambda.svg?branch=master)](https://travis-ci.org/jameshy/pgdump-aws-lambda)
 # Overview
 
-A simple AWS Lambda function that runs pg_dump and streams the output to s3.
+An AWS Lambda function that runs pg_dump and streams the output to s3.
 
-Using AWS, you can schedule it to run periodically.
+It can be configured to run periodically using CloudWatch events.
 
+# Quick start
 
-# Instructions
+1. Create an AWS lambda function:
+    - Runtime: Node.js 6.10
+    - Code entry type: Upload a .ZIP file
+    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v0.0.2/pgdump-aws-lambda.zip))
+    - Configuration -> Advanced Settings
+        - Timeout = 5 minutes
+        - Select a VPC and security group (must be suitable for connecting to the target database server)
+2. Create a CloudWatch rule:
+    - Event Source: Fixed rate of 1 hour
+    - Targets: Lambda Function (the one created in step #1)
+    - Configure input -> Constant (JSON text) and paste your config, e.g.:
+    ```json
+    {
+        "PGDATABASE": "oxandcart",
+        "PGUSER": "staging",
+        "PGPASSWORD": "uBXKFecSKu7hyNu4",
+        "PGHOST": "database.com",
+        "S3_BUCKET" : "my-db-backups",
+        "ROOT": "hourly-backups"
+    }
+    ```
 
-1. Create an AWS lambda function using the [zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v0.0.2/pgdump-aws-lambda.zip) as "function package".
-2. Add a "CloudWatch Events - Schedule" trigger.
-3. In the 'rule', setup your schedule and configure the lamba input to something like:
-```json
-{
-    "PGHOST": "database.myserver.com",
-    "PGUSER": "my-user",
-    "PGPASSWORD": "my-password",
-    "PGDATABASE": "my-database-name",
-    "S3_BUCKET": "my-s3-backup-bucket",
-    "SUBKEY": "production"
-}
-```
+Note: you can test the lambda function using the "Test" button and providing config like above.
+
+**AWS lambda has a 5 minute maximum execution time for lambda functions, so your backup must take less time that that.**
 
 # File Naming
 
 This function will store your backup with the following s3 key:
 
-s3://${S3_BUCKET}/${SUBKEY}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
+s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
+
+# PostgreSQL version compatibility
+
+This script uses PostgreSQL pg_dump utility from PostgreSQL 9.6.2.
 
 # Loading your own `pg_dump` binary
-1. spin up Amazon AMI image on EC2 (since the lambda function will run
+1. Spin up an Amazon AMI image on EC2 (since the lambda function will run
    on Amazon AMI image, based off of CentOS, using it would have the
-best chance of being compatiable)
-2. install postgres as normal (current default version is 9.5, but you can find
-   packages on the official postgres site for 9.6)
-3. run `scp -i YOUR-ID.pem ec2-user@AWS_IP:/usr/bin/pg_dump ./bin/` and `scp -i YOUR-ID.pem ec2-user@AWS_UP:/usr/lib64/libpq.so.5.8 ./bin/libpq.so.5`
+best chance of being compatible)
+2. Install PostgreSQL using yum.  You can install the latest version from the [official repository](https://yum.postgresql.org/repopackages.php#pg96).
+3. Add a new directory for your pg_dump binaries: `mkdir bin/postgres-9.5.2`
+3. Copy the binaries
+ - `scp -i YOUR-ID.pem ec2-user@AWS_IP:/usr/bin/pg_dump ./bin/postgres-9.5.2/pg_dump`
+ - `scp -i YOUR-ID.pem ec2-user@AWS_UP:/usr/lib64/libpq.so.5.8 ./bin/postgres-9.5.2/libpq.so.5`
+4. When calling the handler, pass the env variable PGDUMP_PATH=postgres-9.5.2 to use the binaries in the bin/postgres-9.5.2 directory.
 
 NOTE: `libpq.so.5.8` is found out by running `ll /usr/lib64/libpq.so.5`
 and looking at where the symlink goes to.
-
