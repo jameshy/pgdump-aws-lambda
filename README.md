@@ -1,6 +1,7 @@
 # pgdump-aws-lambda
 
 [![Build Status](https://travis-ci.org/jameshy/pgdump-aws-lambda.svg?branch=master)](https://travis-ci.org/jameshy/pgdump-aws-lambda)
+[![Coverage Status](https://coveralls.io/repos/github/jameshy/pgdump-aws-lambda/badge.svg?branch=master)](https://coveralls.io/github/jameshy/pgdump-aws-lambda?branch=master)
 # Overview
 
 An AWS Lambda function that runs pg_dump and streams the output to s3.
