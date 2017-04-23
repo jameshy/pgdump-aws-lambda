@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+    - '6.10'
+addons:
+    postgresql: '9.4'
+after_success: npm run coverage
+before_deploy:
+    - npm run deploy
+cache:
+  directories:
+    - node_modules
+deploy:
+    provider: releases
+    skip_cleanup: true
+    api_key:
+        secure: f44oSsSYiUDdT8SeFZRchsAdQrCePt/IqVdKuR8aVkbODatX7hkAOgt/VoTqfDM/Pb2tsfue+3+xO0IOLJSZxLBzb8wysfxhtooip8BVWn8qI9o5B4N6Z6LbpRW5822anilD77MuQetYsiH4ZCObt0ZFsgphuJEMMqVEYTUffP/4mZhPneQUjCZUsZbFT7WbIf8aXOuGOYr6KubgVu0IK/bqH2Fc7VbtqTAoatLa3iJXrBX3YFOpV2peqBraCpo2CI7hWR3ma47k++1NM/NI40LE52LJ/81A2QQG1WQrKrC3u9l54RAKE3OvmU6Lm1o+Ikm7NadcwaR/dV/zUYeVoz57zJJWS0LXwuYwEju0A1loeJpobfZlWG8kBiEveR206x3oOvuNMIyUvWnhGddY5y7GnNqtMn414cxaxcWGRSEdH0+j+dU+JHxCCENX3cLyQNBgGWFVnggljxcx5UgOBsJdjOmuuEEsHITzpdArVggXXgOmEddFtgzlNUtE+kjMOjCbS0EGn81kH+nUT9M5Rrcx7VBQdPG8wZxeYH6o8vHft0bKGO5L2xoktiokQvmNpvuVBOnuwe3c6u3rgsAhKYufxdTqkSqvcDTw7bOSBUSuyErvBViWKOUwjZPTyXfUnSsZj2T/H+gD221TTGOOJBFIcaHCl73RtoV8H4IlRIk=
+    file: dist/pgdump-aws-lambda.zip
+    on:
+        branch: general-improvements
+        tags: true
