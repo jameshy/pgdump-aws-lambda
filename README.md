@@ -81,3 +81,7 @@ best chance of being compatible)
 
 NOTE: `libpq.so.5.8` is found out by running `ll /usr/lib64/libpq.so.5`
 and looking at where the symlink goes to.
+
+## Contributions
+
+Please submit issues and PRs.
