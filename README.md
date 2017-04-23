@@ -46,6 +46,25 @@ s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
 
 This script uses PostgreSQL pg_dump utility from PostgreSQL 9.6.2.
 
+# Encryption
+
+You can pass the config option 'ENCRYPTION_PASSWORD' and the backup will be encrypted using aes-256-ctr algorithm.
+
+Example config:
+```json
+{
+    "PGDATABASE": "dbname",
+    "PGUSER": "postgres",
+    "PGPASSWORD": "password",
+    "PGHOST": "localhost",
+    "S3_BUCKET" : "my-db-backups",
+    "ENCRYPTION_PASSWORD": "my-secret-password"
+}
+```
+
+To decrypt these dumps, use the command:
+`openssl aes-256-ctr -d -in ./encrypted-db.backup  -nosalt -out unencrypted.backup`
+
 # Loading your own `pg_dump` binary
 1. Spin up an Amazon AMI image on EC2 (since the lambda function will run
    on Amazon AMI image, based off of CentOS, using it would have the
