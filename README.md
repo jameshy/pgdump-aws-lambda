@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/jameshy/pgdump-aws-lambda.svg?branch=master)](https://travis-ci.org/jameshy/pgdump-aws-lambda)
 [![Coverage Status](https://coveralls.io/repos/github/jameshy/pgdump-aws-lambda/badge.svg?branch=master)](https://coveralls.io/github/jameshy/pgdump-aws-lambda?branch=master)
+[![npm version](https://badge.fury.io/js/pgdump-aws-lambda.svg)](https://badge.fury.io/js/pgdump-aws-lambda)
 
 # Overview
 
