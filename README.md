@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/jameshy/pgdump-aws-lambda.svg?branch=master)](https://travis-ci.org/jameshy/pgdump-aws-lambda)
 [![Coverage Status](https://coveralls.io/repos/github/jameshy/pgdump-aws-lambda/badge.svg?branch=master)](https://coveralls.io/github/jameshy/pgdump-aws-lambda?branch=master)
-[![npm version](https://badge.fury.io/js/pgdump-aws-lambda.svg)](https://badge.fury.io/js/pgdump-aws-lambda)
 
 # Overview
 
@@ -15,7 +14,7 @@ It can be configured to run periodically using CloudWatch events.
 1. Create an AWS lambda function:
     - Runtime: Node.js 6.10
     - Code entry type: Upload a .ZIP file
-    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v1.1.3/pgdump-aws-lambda.zip))
+    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v1.1.4/pgdump-aws-lambda.zip))
     - Configuration -> Advanced Settings
         - Timeout = 5 minutes
         - Select a VPC and security group (must be suitable for connecting to the target database server)
@@ -25,11 +24,11 @@ It can be configured to run periodically using CloudWatch events.
     - Configure input -> Constant (JSON text) and paste your config, e.g.:
     ```json
     {
-        "PGDATABASE": "database-name",
-        "PGUSER": "postgres",
-        "PGPASSWORD": "password",
-        "PGHOST": "database-host",
-        "S3_BUCKET" : "my-backup-bucket",
+        "PGDATABASE": "oxandcart",
+        "PGUSER": "staging",
+        "PGPASSWORD": "uBXKFecSKu7hyNu4",
+        "PGHOST": "database.com",
+        "S3_BUCKET" : "my-db-backups",
         "ROOT": "hourly-backups"
     }
     ```
@@ -83,6 +82,6 @@ best chance of being compatible)
 NOTE: `libpq.so.5.8` is found out by running `ll /usr/lib64/libpq.so.5`
 and looking at where the symlink goes to.
 
-## Contributions
+## Contributing
 
 Please submit issues and PRs.
