@@ -25,11 +25,11 @@ It can be configured to run periodically using CloudWatch events.
     - Configure input -> Constant (JSON text) and paste your config, e.g.:
     ```json
     {
-        "PGDATABASE": "oxandcart",
-        "PGUSER": "staging",
-        "PGPASSWORD": "uBXKFecSKu7hyNu4",
-        "PGHOST": "database.com",
-        "S3_BUCKET" : "my-db-backups",
+        "PGDATABASE": "database-name",
+        "PGUSER": "postgres",
+        "PGPASSWORD": "password",
+        "PGHOST": "database-host",
+        "S3_BUCKET" : "my-backup-bucket",
         "ROOT": "hourly-backups"
     }
     ```
