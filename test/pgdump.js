@@ -19,7 +19,9 @@ describe('pgdump', () => {
         pgdumpProcess.stdout.write('asdfasdf')
         pgdumpProcess.stderr.write('some-error')
         pgdumpProcess.emit('close', 0)
-        return expect(p).to.eventually.be.rejectedWith(/pg_dump didnt send us a recognizable dump/)
+        return expect(p).to.eventually.be.rejectedWith(
+            /pg_dump gave us an unexpected response/
+        )
     })
 
     it('should stream correctly', () => {
