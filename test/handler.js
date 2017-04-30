@@ -72,4 +72,49 @@ describe('Handler', () => {
             expect(cb.firstCall.args[0]).to.be.null
         })
     })
+
+    it('should return an error when PGDATABASE is not provided', () => {
+        // remove PGDATABASE from the event config
+        makeMockHandler()
+        const event = Object.assign({}, mockEvent)
+        event.PGDATABASE = undefined
+
+        // call handler
+        const cb = sinon.spy()
+        return handler(event, {}, cb)
+        .should.be.rejectedWith(
+            /PGDATABASE not provided in the event data/
+        )
+    })
+
+    it('should return an error when S3_BUCKET is not provided', () => {
+        // remove S3_BUCKET from the event config
+        makeMockHandler()
+        const event = Object.assign({}, mockEvent)
+        event.S3_BUCKET = undefined
+
+        // call handler
+        const cb = sinon.spy()
+        return handler(event, {}, cb)
+        .should.be.rejectedWith(
+            /S3_BUCKET not provided in the event data/
+        )
+    })
+
+    it('should handle pgdump errors correctly', () => {
+        const pgdumpWithErrors = () => {
+            const pgdumpProcess = mockSpawn()()
+            pgdumpProcess.stderr.write('some-error')
+            pgdumpProcess.emit('close', 1)
+            return pgdumpProcess
+        }
+
+        makeMockHandler({
+            mockPgdump: () => pgdump(mockEvent, pgdumpWithErrors)
+        })
+
+        const cb = sinon.spy()
+        return handler(mockEvent, {}, cb)
+        .should.be.rejectedWith(/pg_dump gave us an unexpected response/)
+    })
 })
