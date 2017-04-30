@@ -14,7 +14,7 @@ It can be configured to run periodically using CloudWatch events.
 1. Create an AWS lambda function:
     - Runtime: Node.js 6.10
     - Code entry type: Upload a .ZIP file
-    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v1.1.4/pgdump-aws-lambda.zip))
+    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v1.1.5/pgdump-aws-lambda.zip))
     - Configuration -> Advanced Settings
         - Timeout = 5 minutes
         - Select a VPC and security group (must be suitable for connecting to the target database server)
