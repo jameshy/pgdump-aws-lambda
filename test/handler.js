@@ -1,3 +1,4 @@
+/* eslint no-underscore-dangle: 0 */
 const expect = require('chai').expect
 const rewire = require('rewire')
 const sinon = require('sinon')
@@ -15,7 +16,7 @@ describe('Handler', () => {
         return Promise.resolve(pgdumpProcess)
     }
     const mocks3upload = (stream, config, key) => {
-        return Promise.resolve('s3-key')
+        return Promise.resolve('mock-uploaded' + key)
     }
     it('should backup', () => {
         const s3Spy = sinon.spy(mocks3upload)
