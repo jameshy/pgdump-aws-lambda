@@ -25,9 +25,10 @@
     "sinon": "^2.1.0"
   },
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text mocha test",
+    "test": "mocha test",
     "test:watch": "mocha test -w",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "coverage-html": "nyc --reporter=html --reporter=text mocha test",
     "deploy": "bash bin/makezip.sh"
   },
   "repository": {
