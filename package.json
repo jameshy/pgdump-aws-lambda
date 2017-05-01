@@ -4,6 +4,7 @@
   "description": "Lambda function for executing pg_dump and streaming the output to s3.",
   "main": "index.js",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "moment": "^2.18.1",
     "through2": "^2.0.3"
   },
@@ -24,9 +25,10 @@
     "sinon": "^2.1.0"
   },
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text mocha test",
+    "test": "mocha test",
     "test:watch": "mocha test -w",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "coverage-html": "nyc --reporter=html --reporter=text mocha test",
     "deploy": "bash bin/makezip.sh"
   },
   "repository": {
