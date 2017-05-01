@@ -54,8 +54,8 @@ describe('pgdump', () => {
 
             // eslint-disable-next-line no-bitwise
             const permString = '0' + (stat.mode & 0o777).toString(8)
-            expect(permString).to.equal('0777')
-            if (permString !== '0777') {
+            expect(permString).to.equal('0755')
+            if (permString !== '0755') {
                 throw new Error('binary ' + binaryPath + ' is not executable')
             }
         })
