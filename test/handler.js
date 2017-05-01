@@ -3,13 +3,14 @@ const expect = require('chai').expect
 const rewire = require('rewire')
 const sinon = require('sinon')
 const mockSpawn = require('mock-spawn')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+
+chai.should()
+chai.use(chaiAsPromised)
 
 const handler = rewire('../lib/handler')
 const pgdump = require('../lib/pgdump')
-var chai = require('chai')
-chai.should()
-var chaiAsPromised = require('chai-as-promised')
-chai.use(chaiAsPromised)
 
 describe('Handler', () => {
     const mockPgDumpSuccess = () => {
