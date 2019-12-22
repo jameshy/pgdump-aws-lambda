@@ -1,6 +1,6 @@
-const expect = require('chai').expect
+const { expect } = require('chai')
+const { Readable } = require('stream')
 const encryption = require('../lib/encryption')
-const Readable = require('stream').Readable
 
 describe('encryption', () => {
     it('should encrypt and decrypt', () => {

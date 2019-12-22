@@ -5,7 +5,7 @@ const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 
 chai.use(chaiAsPromised)
-const expect = chai.expect
+const { expect } = chai
 
 const pgdump = require('../lib/pgdump')
 const defaultConfig = require('../lib/config')

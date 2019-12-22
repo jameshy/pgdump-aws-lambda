@@ -5,7 +5,7 @@
     "indent": ["error", 4],
     "semi": ["error", "never"],
     "brace-style": ["error", "stroustrup"],
-    'no-restricted-syntax': [
+    "no-restricted-syntax": [
       "error",
       "ForInStatement",
       "LabeledStatement",
