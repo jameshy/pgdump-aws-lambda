@@ -17,7 +17,6 @@
     "eslint-config-airbnb": "18.0.1",
     "eslint-config-airbnb-base": "14.0.0",
     "eslint-plugin-import": "2.19.1",
-    "istanbul": "0.4.5",
     "mocha": "6.2.2",
     "mock-spawn": "0.2.6",
     "nyc": "14.1.1",
@@ -27,7 +26,7 @@
   "scripts": {
     "test": "mocha test",
     "test:watch": "mocha test -w",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "coverage": "nyc --reporter=text-lcov mocha test| coveralls",
     "coverage-html": "nyc --reporter=html --reporter=text mocha test",
     "deploy": "bash bin/makezip.sh"
   },
