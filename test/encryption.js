@@ -8,6 +8,7 @@ describe('encryption', () => {
 
         // create mock read stream (to mimic a pg_dump output stream)
         const mockedReadStream = new Readable()
+        mockedReadStream._read = () => { }
         mockedReadStream.push(data)
 
         // pipe the readable stream through encrypt
