@@ -4,7 +4,6 @@
   "description": "Lambda function for executing pg_dump and streaming the output to s3.",
   "main": "index.js",
   "dependencies": {
-    "bluebird": "3.7.2",
     "moment": "2.24.0",
     "through2": "3.0.1"
   },
@@ -20,9 +19,9 @@
     "mocha": "6.2.2",
     "mock-spawn": "0.2.6",
     "mockdate": "2.0.5",
-    "nyc": "14.1.1",
+    "nyc": "15.0.0",
     "rewire": "4.0.1",
-    "sinon": "7.5.0"
+    "sinon": "8.0.1"
   },
   "scripts": {
     "test": "mocha test",
