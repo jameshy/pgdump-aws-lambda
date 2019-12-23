@@ -12,30 +12,33 @@ It can be configured to run periodically using CloudWatch events.
 ## Quick start
 
 1. Create an AWS lambda function:
-    - Runtime: Node.js 6.10
-    - Code entry type: Upload a .ZIP file
+    - Author from scratch
+    - Runtime: Node.js 12.x
+2. In *Function code*:
+    - Code Entry Type: Upload a .zip file
+        - Upload `pgdump-aws-lambda.zip`
+    - Basic Settings -> Timeout: 15 minutes
+    - Save
+3. Code entry type: Upload a .ZIP file
     ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v1.1.5/pgdump-aws-lambda.zip))
     - Configuration -> Advanced Settings
-        - Timeout = 5 minutes
-        - Select a VPC and security group (must be suitable for connecting to the target database server)
-2. Create a CloudWatch rule:
+        - Timeout = 15 minutes
+4. Create a CloudWatch rule:
     - Event Source: Fixed rate of 1 hour
     - Targets: Lambda Function (the one created in step #1)
     - Configure input -> Constant (JSON text) and paste your config, e.g.:
     ```json
     {
-        "PGDATABASE": "oxandcart",
-        "PGUSER": "staging",
-        "PGPASSWORD": "uBXKFecSKu7hyNu4",
-        "PGHOST": "database.com",
+        "PGDATABASE": "dbname",
+        "PGUSER": "postgres",
+        "PGPASSWORD": "password",
+        "PGHOST": "host",
         "S3_BUCKET" : "my-db-backups",
         "ROOT": "hourly-backups"
     }
     ```
 
-Note: you can test the lambda function using the "Test" button and providing config like above.
-
-**AWS lambda has a 5 minute maximum execution time for lambda functions, so your backup must take less time that that.**
+**AWS lambda has a 15 minute maximum execution time for lambda functions, so your backup must take less time that that.**
 
 ## File Naming
 
@@ -49,38 +52,19 @@ This script uses the pg_dump utility from PostgreSQL 9.6.2.
 
 It should be able to dump older versions of PostgreSQL. I will try to keep the included  binaries in sync with the latest from postgresql.org, but PR or message me if there is a newer PostgreSQL binary available.
 
-## Encryption
-
-You can pass the config option 'ENCRYPTION_PASSWORD' and the backup will be encrypted using aes-256-ctr algorithm.
-
-Example config:
-```json
-{
-    "PGDATABASE": "dbname",
-    "PGUSER": "postgres",
-    "PGPASSWORD": "password",
-    "PGHOST": "localhost",
-    "S3_BUCKET" : "my-db-backups",
-    "ENCRYPTION_PASSWORD": "my-secret-password"
-}
-```
-
-To decrypt these dumps, use the command:
-`openssl aes-256-ctr -d -in ./encrypted-db.backup  -nosalt -out unencrypted.backup`
-
-## Loading your own `pg_dump` binary
-1. Spin up an Amazon AMI image on EC2 (since the lambda function will run
-   on Amazon AMI image, based off of CentOS, using it would have the
-best chance of being compatible)
-2. Install PostgreSQL using yum.  You can install the latest version from the [official repository](https://yum.postgresql.org/repopackages.php#pg96).
-3. Add a new directory for your pg_dump binaries: `mkdir bin/postgres-9.5.2`
+## Bundling a `pg_dump` binary
+1. Launch an EC2 instance with the Amazon Linux 2 AMI
+2. Connect via SSH and (Install PostgreSQL using yum)[https://stackoverflow.com/questions/55798856/deploy-postgres11-to-elastic-beanstalk-requires-etc-redhat-release].
+3. Locally, create a new directory for your pg_dump binaries: `mkdir bin/postgres-11.6`
 3. Copy the binaries
- - `scp -i YOUR-ID.pem ec2-user@AWS_IP:/usr/bin/pg_dump ./bin/postgres-9.5.2/pg_dump`
- - `scp -i YOUR-ID.pem ec2-user@AWS_UP:/usr/lib64/libpq.so.5.8 ./bin/postgres-9.5.2/libpq.so.5`
-4. When calling the handler, pass the env variable PGDUMP_PATH=postgres-9.5.2 to use the binaries in the bin/postgres-9.5.2 directory.
+ - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/bin/pg_dump ./bin/postgres-11.6/pg_dump`
+ - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/lib64/{libcrypt.so.1,libnss3.so,libsmime3.so,libssl3.so,libsasl2.so.3,liblber-2.4.so.2,libldap_r-2.4.so.2} ./bin/postgres-11.6/`
+ - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/pgsql-11/lib/libpq.so.5 ./bin/postgres-11.6/libpq.so.5`
+4. When calling the handler, pass the environment variable `PGDUMP_PATH=postgres-11.6` to use the binaries in the bin/postgres-11.6 directory.
 
-NOTE: `libpq.so.5.8` is found out by running `ll /usr/lib64/libpq.so.5`
-and looking at where the symlink goes to.
+## Create a new function zip
+
+`npm run deploy`
 
 ## Contributing
 
