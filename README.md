@@ -12,31 +12,30 @@ It can be configured to run periodically using CloudWatch events.
 1. Create an AWS lambda function:
     - Author from scratch
     - Runtime: Node.js 12.x
-2. In *Function code*:
+2. Configuration -> Function code:
     - Code Entry Type: Upload a .zip file
-        - Upload `pgdump-aws-lambda.zip`
+        - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
     - Basic Settings -> Timeout: 15 minutes
     - Save
-3. Code entry type: Upload a .ZIP file
-    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
-    - Configuration -> Advanced Settings
-        - Timeout = 15 minutes
-4. Create a CloudWatch rule:
-    - Event Source: Fixed rate of 1 hour
-    - Targets: Lambda Function (the one created in step #1)
-    - Configure input -> Constant (JSON text) and paste your config, e.g.:
+3. Test
+    - Create new test event, e.g.:
     ```json
     {
         "PGDATABASE": "dbname",
         "PGUSER": "postgres",
         "PGPASSWORD": "password",
         "PGHOST": "host",
-        "S3_BUCKET" : "my-db-backups",
+        "S3_BUCKET" : "db-backups",
         "ROOT": "hourly-backups"
     }
     ```
+    - *Test* and check the output
 
-**AWS lambda has a 15 minute maximum execution time for lambda functions, so your backup must take less time that that.**
+4. Create a CloudWatch rule:
+    - Event Source: Schedule -> Fixed rate of 1 hour
+    - Targets: Lambda Function (the one created in step #1)
+    - Configure input -> Constant (JSON text) and paste your config (as per step #3)
+
 
 #### File Naming
 
@@ -46,7 +45,7 @@ s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
 
 #### AWS Firewall
 
-- If you run the Lambda function outside a VPC, you must enable public access to your database instance.
+- If you run the Lambda function outside a VPC, you must enable public access to your database instance, a non VPC Lambda function executes on the public internet.
 - If you run the Lambda function inside a VPC (not tested), you must allow access from the Lambda Security Group to your database instance. Also you must add a NAT gateway to your VPC so the Lambda can connect to S3.
 
 ## Developer
