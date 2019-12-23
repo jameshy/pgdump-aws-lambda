@@ -17,7 +17,9 @@ It can be configured to run periodically using CloudWatch events.
         - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
     - Basic Settings -> Timeout: 15 minutes
     - Save
-3. Test
+3. Configuration -> Execution role
+    - Edit the role and attach the policy "AmazonS3FullAccess"
+4. Test
     - Create new test event, e.g.:
     ```json
     {
@@ -31,7 +33,7 @@ It can be configured to run periodically using CloudWatch events.
     ```
     - *Test* and check the output
 
-4. Create a CloudWatch rule:
+5. Create a CloudWatch rule:
     - Event Source: Schedule -> Fixed rate of 1 hour
     - Targets: Lambda Function (the one created in step #1)
     - Configure input -> Constant (JSON text) and paste your config (as per step #3)
