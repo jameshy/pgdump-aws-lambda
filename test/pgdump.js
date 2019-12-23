@@ -21,14 +21,13 @@ describe('pgdump', () => {
         const config = {}
         const p = pgdump(config, pgDumpFn)
         pgdumpProcess.stdout.write('asdfasdf')
-        pgdumpProcess.stderr.write('some-error')
         pgdumpProcess.emit('close', 0)
         return expect(p).to.eventually.be.rejectedWith(
-            /pg_dump gave us an unexpected response/
+            'pg_dump gave us an unexpected response'
         )
     })
 
-    it('should stream correctly', () => {
+    it('should stream correctly', async () => {
         const mySpawn = mockSpawn()()
 
         const pgDumpFn = () => mySpawn
@@ -37,10 +36,21 @@ describe('pgdump', () => {
         mySpawn.stdout.write('PGDMP - data - data')
         mySpawn.emit('close', 0)
 
-        return p.then(buffer => {
-            expect(buffer.read().toString('utf8')).to.equal('PGDMP - data - data')
-        })
+        const buffer = await p
+
+        expect(buffer.read().toString('utf8')).to.equal('PGDMP - data - data')
     })
+
+    it('should throw an error when the pg_dump binary does not exist', () => {
+        const config = {
+            PGDUMP_PATH: '/some/non-existant/path/pg_dump'
+        }
+        const p = pgdump(config)
+        return expect(p).to.eventually.be.rejectedWith(
+            'pg_dump not found at /some/non-existant/path/pg_dump/pg_dump'
+        )
+    })
+
     describe('default pg_dump binary', () => {
         const binaryPath = path.join(defaultConfig.PGDUMP_PATH, 'pg_dump')
         it('should exist', () => {
