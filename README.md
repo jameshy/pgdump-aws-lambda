@@ -3,8 +3,6 @@
 [![Build Status](https://travis-ci.org/jameshy/pgdump-aws-lambda.svg?branch=master)](https://travis-ci.org/jameshy/pgdump-aws-lambda)
 [![Coverage Status](https://coveralls.io/repos/github/jameshy/pgdump-aws-lambda/badge.svg?branch=master)](https://coveralls.io/github/jameshy/pgdump-aws-lambda?branch=master)
 
-# Overview
-
 An AWS Lambda function that runs pg_dump and streams the output to s3.
 
 It can be configured to run periodically using CloudWatch events.
@@ -20,7 +18,7 @@ It can be configured to run periodically using CloudWatch events.
     - Basic Settings -> Timeout: 15 minutes
     - Save
 3. Code entry type: Upload a .ZIP file
-    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v1.1.5/pgdump-aws-lambda.zip))
+    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
     - Configuration -> Advanced Settings
         - Timeout = 15 minutes
 4. Create a CloudWatch rule:
@@ -40,19 +38,20 @@ It can be configured to run periodically using CloudWatch events.
 
 **AWS lambda has a 15 minute maximum execution time for lambda functions, so your backup must take less time that that.**
 
-## File Naming
+#### File Naming
 
 This function will store your backup with the following s3 key:
 
 s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
 
-## PostgreSQL version compatibility
+#### AWS Firewall
 
-This script uses the pg_dump utility from PostgreSQL 9.6.2.
+- If you run the Lambda function outside a VPC, you must enable public access to your database instance.
+- If you run the Lambda function inside a VPC (not tested), you must allow access from the Lambda Security Group to your database instance. Also you must add a NAT gateway to your VPC so the Lambda can connect to S3.
 
-It should be able to dump older versions of PostgreSQL. I will try to keep the included  binaries in sync with the latest from postgresql.org, but PR or message me if there is a newer PostgreSQL binary available.
+## Developer
 
-## Bundling a `pg_dump` binary
+#### Bundling a new `pg_dump` binary
 1. Launch an EC2 instance with the Amazon Linux 2 AMI
 2. Connect via SSH and (Install PostgreSQL using yum)[https://stackoverflow.com/questions/55798856/deploy-postgres11-to-elastic-beanstalk-requires-etc-redhat-release].
 3. Locally, create a new directory for your pg_dump binaries: `mkdir bin/postgres-11.6`
@@ -62,10 +61,10 @@ It should be able to dump older versions of PostgreSQL. I will try to keep the i
  - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/pgsql-11/lib/libpq.so.5 ./bin/postgres-11.6/libpq.so.5`
 4. When calling the handler, pass the environment variable `PGDUMP_PATH=postgres-11.6` to use the binaries in the bin/postgres-11.6 directory.
 
-## Create a new function zip
+#### Creating a new function zip
 
 `npm run deploy`
 
-## Contributing
+#### Contributing
 
 Please submit issues and PRs.
