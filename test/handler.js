@@ -2,6 +2,7 @@
 const { expect } = require('chai')
 const rewire = require('rewire')
 const sinon = require('sinon')
+const mockDate = require('mockdate')
 const mockSpawn = require('mock-spawn')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
@@ -20,7 +21,7 @@ describe('Handler', () => {
         return Promise.resolve(pgdumpProcess)
     }
     const mockS3UploadSuccess = (stream, config, key) => {
-        return Promise.resolve('mock-uploaded' + key)
+        return Promise.resolve('mock-uploaded/' + key)
     }
 
     const mockEvent = {
@@ -41,62 +42,52 @@ describe('Handler', () => {
         }
     }
 
+    // mock dates, so we can test the backup file name
+    mockDate.set('2017-05-02T01:33:11Z')
 
-    it('should backup', () => {
+    it('should backup', async () => {
         const { s3Spy, pgSpy } = makeMockHandler()
 
-        const context = {}
-        const cb = sinon.spy()
+        const result = await handler(mockEvent)
 
-        return handler(mockEvent, context, cb)
-            .then(() => {
-                // handler should have called pgSpy with correct arguments
-                expect(pgSpy.calledOnce).to.be.true
-                expect(pgSpy.firstCall.args).to.have.length(1)
-                const [arg0] = pgSpy.firstCall.args
-                expect(arg0.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
-                expect(arg0.PGDATABASE).to.equal(mockEvent.PGDATABASE)
+        // handler should have called pgSpy with correct arguments
+        expect(pgSpy.calledOnce).to.be.true
+        expect(pgSpy.firstCall.args).to.have.length(1)
+        const [arg0] = pgSpy.firstCall.args
+        expect(arg0.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+        expect(arg0.PGDATABASE).to.equal(mockEvent.PGDATABASE)
 
-                // handler should have called s3spy with correct arguments
-                expect(s3Spy.calledOnce).to.be.true
-                expect(s3Spy.firstCall.args).to.have.length(3)
-                const [stream, config, key] = s3Spy.firstCall.args
-                expect(stream).to.be.ok
-                expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
-                expect(config.PGDATABASE).to.equal(mockEvent.PGDATABASE)
-                expect(key).to.be.a.string
-                expect(key).to.not.be.empty
-
-                // cb should have been called (lambda callback)
-                expect(cb.calledOnce).to.be.true
-                expect(cb.firstCall.args).to.have.length(1)
-                expect(cb.firstCall.args[0]).to.be.null
-            })
+        // handler should have called s3spy with correct arguments
+        expect(s3Spy.calledOnce).to.be.true
+        expect(s3Spy.firstCall.args).to.have.length(3)
+        const [stream, config, key] = s3Spy.firstCall.args
+        expect(stream).to.be.ok
+        expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+        expect(config.PGDATABASE).to.equal(mockEvent.PGDATABASE)
+        expect(key).to.be.a.string
+        expect(key).to.not.be.empty
+        expect(result).to.equal(
+            'mock-uploaded/2017-05-02/dbname-02-05-2017@01-33-11.backup'
+        )
     })
 
-    it('should return an error when PGDATABASE is not provided', () => {
-        // remove PGDATABASE from the event config
+    it('should throw an error when PGDATABASE is not provided', () => {
         makeMockHandler()
         const event = { ...mockEvent }
         event.PGDATABASE = undefined
 
-        // call handler
-        const cb = sinon.spy()
-        return handler(event, {}, cb)
+        return handler(event)
             .should.be.rejectedWith(
                 /PGDATABASE not provided in the event data/
             )
     })
 
-    it('should return an error when S3_BUCKET is not provided', () => {
-        // remove S3_BUCKET from the event config
+    it('should throw an error when S3_BUCKET is not provided', () => {
         makeMockHandler()
         const event = { ...mockEvent }
         event.S3_BUCKET = undefined
 
-        // call handler
-        const cb = sinon.spy()
-        return handler(event, {}, cb)
+        return handler(event)
             .should.be.rejectedWith(
                 /S3_BUCKET not provided in the event data/
             )
@@ -105,7 +96,7 @@ describe('Handler', () => {
     it('should handle pgdump errors correctly', () => {
         const pgdumpWithErrors = () => {
             const pgdumpProcess = mockSpawn()()
-            pgdumpProcess.stderr.write('some-error')
+            pgdumpProcess.stderr.write('-error')
             pgdumpProcess.emit('close', 1)
             return pgdumpProcess
         }
@@ -114,8 +105,9 @@ describe('Handler', () => {
             mockPgdump: () => pgdump(mockEvent, pgdumpWithErrors)
         })
 
-        const cb = sinon.spy()
-        return handler(mockEvent, {}, cb)
-            .should.be.rejectedWith(/pg_dump gave us an unexpected response/)
+        return handler(mockEvent)
+            .should.be.rejectedWith(
+                /pg_dump gave us an unexpected response/
+            )
     })
 })
