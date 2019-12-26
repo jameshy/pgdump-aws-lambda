@@ -21,7 +21,8 @@
     "mockdate": "2.0.5",
     "nyc": "15.0.0",
     "rewire": "4.0.1",
-    "sinon": "8.0.1"
+    "sinon": "8.0.1",
+    "tmp": "^0.1.0"
   },
   "scripts": {
     "test": "mocha test",
