@@ -50,6 +50,40 @@ s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
 - If you run the Lambda function outside a VPC, you must enable public access to your database instance, a non VPC Lambda function executes on the public internet.
 - If you run the Lambda function inside a VPC (not tested), you must allow access from the Lambda Security Group to your database instance. Also you must add a NAT gateway to your VPC so the Lambda can connect to S3.
 
+#### Encryption
+
+You can add an encryption key to your event, e.g.
+
+```json
+{
+    "PGDATABASE": "dbname",
+    "PGUSER": "postgres",
+    "PGPASSWORD": "password",
+    "PGHOST": "host",
+    "S3_BUCKET" : "db-backups",
+    "ROOT": "hourly-backups",
+    "ENCRYPT_KEY": "c0d71d7ae094bdde1ef60db8503079ce615e71644133dc22e9686dc7216de8d0"
+}
+```
+
+The key should be exactly 64 hex characters (32 hex bytes).
+
+When this key is present the function will do streaming encryption directly from pg_dump -> S3.
+
+It uses the aes-256-cbc encryption algorithm with a random IV for each backup file.
+The IV is stored alongside the backup in a separate file with the .iv extension.
+
+You can decrypt such a backup with the following bash command:
+
+```bash
+openssl enc -aes-256-cbc -d \
+-in postgres-27-12-2019@13-19-13.backup \
+-out postgres-27-12-2019@13-19-13.unencrypted.backup \
+-K c0d71d7ae094bdde1ef60db8503079ce615e71644133dc22e9686dc7216de8d0 \
+-iv $(< postgres-27-12-2019@13-19-13.backup.iv)
+```
+
+
 ## Developer
 
 #### Bundling a new `pg_dump` binary
