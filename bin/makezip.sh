@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-SCRIPT=`readlink -f $0`
-SCRIPTPATH=`dirname $SCRIPT`
-PROJECTROOT=`readlink -f $SCRIPTPATH/..`
 FILENAME="pgdump-aws-lambda.zip"
 
 command_exists () {
@@ -12,43 +9,38 @@ command_exists () {
 
 if ! command_exists zip ; then
     echo "zip command not found, try: sudo apt-get install zip"
-    exit 0
+    exit 1
+fi
+if [ ! -f ./package.json ]; then
+    echo "command must be run from the project root directory"
+    exit 1
 fi
 
 
-cd $PROJECTROOT
-
-echo "creating bundle.."
 # create a temp directory for our bundle
 BUNDLE_DIR=$(mktemp -d)
-# copy entire app into BUNDLE_DIR
-cp -r * $BUNDLE_DIR/
+# copy entire project into BUNDLE_DIR
+cp -R * $BUNDLE_DIR/
 
-# prune things from BUNDLE_DIR
-echo "running npm prune.."
-cd $BUNDLE_DIR
-# prune dev-dependancies from node_modules
-npm prune --production >> /dev/null
-
+# remove unnecessary things
+pushd $BUNDLE_DIR > /dev/null
+echo "cleaning.."
+rm -rf node_modules/*
+npm install --production --no-progress > /dev/null
 rm -rf dist coverage test
 
-
-# create and empty the dist directory
-if [ ! -d $PROJECTROOT/dist ]; then
-    mkdir $PROJECTROOT/dist
-fi
-rm -rf $PROJECTROOT/dist/*
-
 # create zip of bundle/
-echo "creating zip.."
+echo "zipping.."
 zip -q -r $FILENAME *
-echo "zip -q -r $FILENAME *"
-mv $FILENAME $PROJECTROOT/dist/$FILENAME
+
+# return to project dir
+popd > /dev/null
+
+# copy the zip
+mkdir -p ./dist
+cp $BUNDLE_DIR/$FILENAME ./dist/$FILENAME
 
 echo "successfully created dist/$FILENAME"
 
 # remove bundle/
 rm -rf $BUNDLE_DIR
-
-
-cd $PROJECTROOT

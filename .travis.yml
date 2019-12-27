@@ -1,8 +1,6 @@
 language: node_js
 node_js:
-    - '6.10'
-addons:
-    postgresql: '9.4'
+    - '12.14.0'
 after_success: npm run coverage
 before_deploy:
     - npm run deploy

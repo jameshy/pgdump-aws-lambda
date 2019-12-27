@@ -3,8 +3,6 @@
 [![Build Status](https://travis-ci.org/jameshy/pgdump-aws-lambda.svg?branch=master)](https://travis-ci.org/jameshy/pgdump-aws-lambda)
 [![Coverage Status](https://coveralls.io/repos/github/jameshy/pgdump-aws-lambda/badge.svg?branch=master)](https://coveralls.io/github/jameshy/pgdump-aws-lambda?branch=master)
 
-# Overview
-
 An AWS Lambda function that runs pg_dump and streams the output to s3.
 
 It can be configured to run periodically using CloudWatch events.
@@ -12,76 +10,96 @@ It can be configured to run periodically using CloudWatch events.
 ## Quick start
 
 1. Create an AWS lambda function:
-    - Runtime: Node.js 6.10
-    - Code entry type: Upload a .ZIP file
-    ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/download/v1.1.5/pgdump-aws-lambda.zip))
-    - Configuration -> Advanced Settings
-        - Timeout = 5 minutes
-        - Select a VPC and security group (must be suitable for connecting to the target database server)
-2. Create a CloudWatch rule:
-    - Event Source: Fixed rate of 1 hour
-    - Targets: Lambda Function (the one created in step #1)
-    - Configure input -> Constant (JSON text) and paste your config, e.g.:
+    - Author from scratch
+    - Runtime: Node.js 12.x
+2. Configuration -> Function code:
+    - Code Entry Type: Upload a .zip file
+        - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
+    - Basic Settings -> Timeout: 15 minutes
+    - Save
+3. Configuration -> Execution role
+    - Edit the role and attach the policy "AmazonS3FullAccess"
+4. Test
+    - Create new test event, e.g.:
     ```json
     {
-        "PGDATABASE": "oxandcart",
-        "PGUSER": "staging",
-        "PGPASSWORD": "uBXKFecSKu7hyNu4",
-        "PGHOST": "database.com",
-        "S3_BUCKET" : "my-db-backups",
+        "PGDATABASE": "dbname",
+        "PGUSER": "postgres",
+        "PGPASSWORD": "password",
+        "PGHOST": "host",
+        "S3_BUCKET" : "db-backups",
         "ROOT": "hourly-backups"
     }
     ```
+    - *Test* and check the output
 
-Note: you can test the lambda function using the "Test" button and providing config like above.
+5. Create a CloudWatch rule:
+    - Event Source: Schedule -> Fixed rate of 1 hour
+    - Targets: Lambda Function (the one created in step #1)
+    - Configure input -> Constant (JSON text) and paste your config (as per step #3)
 
-**AWS lambda has a 5 minute maximum execution time for lambda functions, so your backup must take less time that that.**
 
-## File Naming
+#### File Naming
 
 This function will store your backup with the following s3 key:
 
 s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
 
-## PostgreSQL version compatibility
+#### AWS Firewall
 
-This script uses the pg_dump utility from PostgreSQL 9.6.2.
+- If you run the Lambda function outside a VPC, you must enable public access to your database instance, a non VPC Lambda function executes on the public internet.
+- If you run the Lambda function inside a VPC (not tested), you must allow access from the Lambda Security Group to your database instance. Also you must add a NAT gateway to your VPC so the Lambda can connect to S3.
 
-It should be able to dump older versions of PostgreSQL. I will try to keep the included  binaries in sync with the latest from postgresql.org, but PR or message me if there is a newer PostgreSQL binary available.
+#### Encryption
 
-## Encryption
+You can add an encryption key to your event, e.g.
 
-You can pass the config option 'ENCRYPTION_PASSWORD' and the backup will be encrypted using aes-256-ctr algorithm.
-
-Example config:
 ```json
 {
     "PGDATABASE": "dbname",
     "PGUSER": "postgres",
     "PGPASSWORD": "password",
-    "PGHOST": "localhost",
-    "S3_BUCKET" : "my-db-backups",
-    "ENCRYPTION_PASSWORD": "my-secret-password"
+    "PGHOST": "host",
+    "S3_BUCKET" : "db-backups",
+    "ROOT": "hourly-backups",
+    "ENCRYPT_KEY": "c0d71d7ae094bdde1ef60db8503079ce615e71644133dc22e9686dc7216de8d0"
 }
 ```
 
-To decrypt these dumps, use the command:
-`openssl aes-256-ctr -d -in ./encrypted-db.backup  -nosalt -out unencrypted.backup`
+The key should be exactly 64 hex characters (32 hex bytes).
 
-## Loading your own `pg_dump` binary
-1. Spin up an Amazon AMI image on EC2 (since the lambda function will run
-   on Amazon AMI image, based off of CentOS, using it would have the
-best chance of being compatible)
-2. Install PostgreSQL using yum.  You can install the latest version from the [official repository](https://yum.postgresql.org/repopackages.php#pg96).
-3. Add a new directory for your pg_dump binaries: `mkdir bin/postgres-9.5.2`
+When this key is present the function will do streaming encryption directly from pg_dump -> S3.
+
+It uses the aes-256-cbc encryption algorithm with a random IV for each backup file.
+The IV is stored alongside the backup in a separate file with the .iv extension.
+
+You can decrypt such a backup with the following bash command:
+
+```bash
+openssl enc -aes-256-cbc -d \
+-in postgres-27-12-2019@13-19-13.backup \
+-out postgres-27-12-2019@13-19-13.unencrypted.backup \
+-K c0d71d7ae094bdde1ef60db8503079ce615e71644133dc22e9686dc7216de8d0 \
+-iv $(< postgres-27-12-2019@13-19-13.backup.iv)
+```
+
+
+## Developer
+
+#### Bundling a new `pg_dump` binary
+1. Launch an EC2 instance with the Amazon Linux 2 AMI
+2. Connect via SSH and (Install PostgreSQL using yum)[https://stackoverflow.com/questions/55798856/deploy-postgres11-to-elastic-beanstalk-requires-etc-redhat-release].
+3. Locally, create a new directory for your pg_dump binaries: `mkdir bin/postgres-11.6`
 3. Copy the binaries
- - `scp -i YOUR-ID.pem ec2-user@AWS_IP:/usr/bin/pg_dump ./bin/postgres-9.5.2/pg_dump`
- - `scp -i YOUR-ID.pem ec2-user@AWS_UP:/usr/lib64/libpq.so.5.8 ./bin/postgres-9.5.2/libpq.so.5`
-4. When calling the handler, pass the env variable PGDUMP_PATH=postgres-9.5.2 to use the binaries in the bin/postgres-9.5.2 directory.
+ - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/bin/pg_dump ./bin/postgres-11.6/pg_dump`
+ - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/lib64/{libcrypt.so.1,libnss3.so,libsmime3.so,libssl3.so,libsasl2.so.3,liblber-2.4.so.2,libldap_r-2.4.so.2} ./bin/postgres-11.6/`
+ - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/pgsql-11/lib/libpq.so.5 ./bin/postgres-11.6/libpq.so.5`
+4. When calling the handler, pass the environment variable `PGDUMP_PATH=postgres-11.6` to use the binaries in the bin/postgres-11.6 directory.
 
-NOTE: `libpq.so.5.8` is found out by running `ll /usr/lib64/libpq.so.5`
-and looking at where the symlink goes to.
+#### Creating a new function zip
 
-## Contributing
+`npm run deploy`
+
+#### Contributing
 
 Please submit issues and PRs.

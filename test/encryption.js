@@ -1,24 +1,69 @@
-const expect = require('chai').expect
+const fs = require('fs')
+const tmp = require('tmp')
+const { expect } = require('chai')
 const encryption = require('../lib/encryption')
-const Readable = require('stream').Readable
 
+
+function waitForStream(stream) {
+    return new Promise(fulfill => stream.on('finish', fulfill))
+}
+
+// in real world usage we use streams from S3
+// but here in tests we use streams from fs
 describe('encryption', () => {
-    it('should encrypt and decrypt', () => {
-        const data = 'some-unencrypted-data'
+    const ENCRYPT_KEY = '4141414141414141414141414141414141414141414141414141414141414141'
+    const IV = encryption.generateIv()
 
-        // create mock read stream (to mimic a pg_dump output stream)
-        const mockedReadStream = new Readable()
-        mockedReadStream.push(data)
+    it('should encrypt and decrypt', async () => {
+        // create a temporary, unencrypted file
+        const unencryptedPath = tmp.tmpNameSync()
+        fs.writeFileSync(unencryptedPath, 'some-unencrypted-data')
 
-        // pipe the readable stream through encrypt
-        const encrypted = encryption.encrypt(mockedReadStream, 'password123')
+        // encrypt
+        const encryptedStream = encryption.encrypt(
+            fs.createReadStream(unencryptedPath),
+            ENCRYPT_KEY,
+            IV
+        )
+        const encryptedPath = tmp.tmpNameSync()
+        let writeStream = fs.createWriteStream(encryptedPath)
+        encryptedStream.pipe(writeStream)
+        await waitForStream(writeStream)
 
-        // pipe the encrypted stream through decrypt
-        const decrypted = encryption.decrypt(encrypted, 'password123')
-        mockedReadStream.emit('data', data)
+        const contents = fs.readFileSync(encryptedPath)
+        expect(contents).to.have.length(32)
+        expect(contents.includes('some-unencrypted-data')).to.be.false
 
-        // verify the decrypted string matches the original data
-        const output = decrypted.read().toString('utf8')
-        expect(output).to.equal(data)
+        // decrypt
+        const decryptedStream = encryption.decrypt(
+            fs.createReadStream(encryptedPath),
+            ENCRYPT_KEY,
+            IV
+        )
+        const decryptedPath = tmp.tmpNameSync()
+        writeStream = fs.createWriteStream(decryptedPath)
+        decryptedStream.pipe(writeStream)
+        await waitForStream(writeStream)
+
+        // verify decrypt was successful
+        expect(
+            fs.readFileSync(decryptedPath).toString('utf8')
+        ).to.equal('some-unencrypted-data')
+    })
+
+    it('should throw an error for an invalid key', () => {
+        expect(() => encryption.encrypt(
+            undefined,
+            'bad-key',
+            'bad-IV'
+        )).to.throw('encrypt key must be a 32 byte hex string')
+    })
+
+    it('should throw an error for an invalid iv', () => {
+        expect(() => encryption.encrypt(
+            undefined,
+            ENCRYPT_KEY,
+            'bad-IV'
+        )).to.throw('encrypt iv must be exactly 16 bytes, but received 6')
     })
 })
