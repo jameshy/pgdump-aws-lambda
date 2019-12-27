@@ -25,8 +25,8 @@
     "tmp": "^0.1.0"
   },
   "scripts": {
-    "test": "mocha test",
-    "test:watch": "mocha test -w",
+    "test": "NODE_ENV=test mocha test",
+    "test:watch": "NODE_ENV=test mocha test -w",
     "coverage": "nyc --reporter=text-lcov mocha test| coveralls",
     "coverage-html": "nyc --reporter=html --reporter=text mocha test",
     "deploy": "bash bin/makezip.sh"
