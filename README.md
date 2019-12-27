@@ -88,7 +88,7 @@ openssl enc -aes-256-cbc -d \
 
 #### Bundling a new `pg_dump` binary
 1. Launch an EC2 instance with the Amazon Linux 2 AMI
-2. Connect via SSH and (Install PostgreSQL using yum)[https://stackoverflow.com/questions/55798856/deploy-postgres11-to-elastic-beanstalk-requires-etc-redhat-release].
+2. Connect via SSH and [Install PostgreSQL using yum](https://stackoverflow.com/questions/55798856/deploy-postgres11-to-elastic-beanstalk-requires-etc-redhat-release).
 3. Locally, create a new directory for your pg_dump binaries: `mkdir bin/postgres-11.6`
 3. Copy the binaries
  - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/bin/pg_dump ./bin/postgres-11.6/pg_dump`
