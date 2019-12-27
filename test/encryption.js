@@ -26,8 +26,9 @@ describe('encryption', () => {
             IV
         )
         const encryptedPath = tmp.tmpNameSync()
-        encryptedStream.pipe(fs.createWriteStream(encryptedPath))
-        await waitForStream(encryptedStream)
+        let writeStream = fs.createWriteStream(encryptedPath)
+        encryptedStream.pipe(writeStream)
+        await waitForStream(writeStream)
 
         const contents = fs.readFileSync(encryptedPath)
         expect(contents).to.have.length(32)
@@ -40,8 +41,9 @@ describe('encryption', () => {
             IV
         )
         const decryptedPath = tmp.tmpNameSync()
-        decryptedStream.pipe(fs.createWriteStream(decryptedPath))
-        await waitForStream(decryptedStream)
+        writeStream = fs.createWriteStream(decryptedPath)
+        decryptedStream.pipe(writeStream)
+        await waitForStream(writeStream)
 
         // verify decrypt was successful
         expect(

@@ -14,19 +14,14 @@ const handler = rewire('../lib/handler')
 const pgdump = require('../lib/pgdump')
 
 describe('Handler', () => {
-    const mockPgDumpSuccess = () => {
+    function mockPgDumpSuccess() {
         const pgdumpProcess = mockSpawn()()
         pgdumpProcess.stdout.write('asdfasdf')
         pgdumpProcess.emit('close', 0)
-        return Promise.resolve(pgdumpProcess)
+        return Promise.resolve(pgdumpProcess.stdout)
     }
-    const mockS3UploadSuccess = (stream, config, key) => {
+    function mockS3UploadSuccess(stream, config, key) {
         return Promise.resolve('mock-uploaded/' + key)
-    }
-
-    const mockEvent = {
-        PGDATABASE: 'dbname',
-        S3_BUCKET: 's3bucket'
     }
 
     function makeMockHandler({ mockPgdump, mockS3upload } = {}) {
@@ -42,10 +37,14 @@ describe('Handler', () => {
         }
     }
 
+    const mockEvent = {
+        PGDATABASE: 'dbname',
+        S3_BUCKET: 's3bucket'
+    }
     // mock dates, so we can test the backup file name
     mockDate.set('2017-05-02T01:33:11Z')
 
-    it('should backup', async () => {
+    it('should upload a backup', async () => {
         const { s3Spy, pgSpy } = makeMockHandler()
 
         const result = await handler(mockEvent)
@@ -64,8 +63,44 @@ describe('Handler', () => {
         expect(stream).to.be.ok
         expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
         expect(config.PGDATABASE).to.equal(mockEvent.PGDATABASE)
+        expect(key).to.equal('2017-05-02/dbname-02-05-2017@01-33-11.backup')
+        expect(result).to.equal(
+            'mock-uploaded/2017-05-02/dbname-02-05-2017@01-33-11.backup'
+        )
+    })
+
+    it('should upload the backup file and an iv file', async () => {
+        const { s3Spy } = makeMockHandler()
+
+        const event = {
+            ...mockEvent,
+            ENCRYPT_KEY:
+            '4141414141414141414141414141414141414141414141414141414141414141'
+        }
+
+        const result = await handler(event)
+
+        // handler should have called s3spy with correct arguments
+        expect(s3Spy.calledTwice).to.be.true
+        expect(s3Spy.firstCall.args).to.have.length(3)
+
+        // first call is the IV
+        const [stream, config, key] = s3Spy.firstCall.args
+        expect(stream).to.have.length(32)
+        expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+        expect(config.PGDATABASE).to.equal(mockEvent.PGDATABASE)
         expect(key).to.be.a.string
         expect(key).to.not.be.empty
+        expect(key).to.equal('2017-05-02/dbname-02-05-2017@01-33-11.backup.iv')
+
+        // second call is the backup
+        const [stream2, config2, key2] = s3Spy.secondCall.args
+        expect(stream2).to.be.ok
+        expect(config2.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+        expect(config2.PGDATABASE).to.equal(mockEvent.PGDATABASE)
+        expect(key2).to.equal('2017-05-02/dbname-02-05-2017@01-33-11.backup')
+
+        // handler should return the backup path
         expect(result).to.equal(
             'mock-uploaded/2017-05-02/dbname-02-05-2017@01-33-11.backup'
         )
