@@ -3,6 +3,7 @@ const fs = require('fs')
 const mockSpawn = require('mock-spawn')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
+const sinon = require('sinon')
 
 chai.use(chaiAsPromised)
 const { expect } = chai
@@ -27,14 +28,67 @@ describe('pgdump', () => {
         )
     })
 
-    it('should stream correctly', async () => {
-        const mySpawn = mockSpawn()()
-
-        const pgDumpFn = () => mySpawn
+    it('should call pg_dump with some default args', async () => {
+        const pgdumpProcess = mockSpawn()()
+        const pgDumpFn = sinon.fake.returns(pgdumpProcess)
         const config = {}
         const p = pgdump(config, pgDumpFn)
-        mySpawn.stdout.write('PGDMP - data - data')
-        mySpawn.emit('close', 0)
+        pgdumpProcess.stdout.write('PGDMP - data - data')
+        pgdumpProcess.emit('close', 0)
+        await p
+
+        expect(pgDumpFn.calledOnce).to.be.true
+        const pgDumpArgs = pgDumpFn.getCall(0).args[1]
+        expect(pgDumpArgs).to.deep.equal(['-Fc', '-Z1'])
+    })
+
+    it('should call pg_dump with provided extra arguments as array', async () => {
+        const pgdumpProcess = mockSpawn()()
+        const pgDumpFn = sinon.fake.returns(pgdumpProcess)
+        const config = {
+            PGDUMP_ARGS: ['--exclude-table=ignored-table', '-N', 'public']
+        }
+        const p = pgdump(config, pgDumpFn)
+        pgdumpProcess.stdout.write('PGDMP - data - data')
+        pgdumpProcess.emit('close', 0)
+        await p
+
+        expect(pgDumpFn.calledOnce).to.be.true
+        const pgDumpArgs = pgDumpFn.getCall(0).args[1]
+
+        expect(
+            pgDumpArgs
+        ).to.deep.equal(['-Fc', '-Z1', '--exclude-table=ignored-table', '-N', 'public'])
+    })
+
+    it('should call pg_dump with provided extra arguments as string', async () => {
+        const pgdumpProcess = mockSpawn()()
+        const pgDumpFn = sinon.fake.returns(pgdumpProcess)
+        const config = {
+            PGDUMP_ARGS: '--exclude-table=ignored-table -N public'
+        }
+
+        const p = pgdump(config, pgDumpFn)
+        pgdumpProcess.stdout.write('PGDMP - data - data')
+        pgdumpProcess.emit('close', 0)
+        await p
+
+        expect(pgDumpFn.calledOnce).to.be.true
+        const pgDumpArgs = pgDumpFn.getCall(0).args[1]
+
+        expect(
+            pgDumpArgs
+        ).to.deep.equal(['-Fc', '-Z1', '--exclude-table=ignored-table', '-N', 'public'])
+    })
+
+    it('should stream correctly', async () => {
+        const pgdumpProcess = mockSpawn()()
+
+        const pgDumpFn = () => pgdumpProcess
+        const config = {}
+        const p = pgdump(config, pgDumpFn)
+        pgdumpProcess.stdout.write('PGDMP - data - data')
+        pgdumpProcess.emit('close', 0)
 
         const buffer = await p
 
