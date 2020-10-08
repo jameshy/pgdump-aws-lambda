@@ -36,7 +36,7 @@ It can be configured to run periodically using CloudWatch events.
 5. Create a CloudWatch rule:
     - Event Source: Schedule -> Fixed rate of 1 hour
     - Targets: Lambda Function (the one created in step #1)
-    - Configure input -> Constant (JSON text) and paste your config (as per step #3)
+    - Configure input -> Constant (JSON text) and paste your config (as per step #4)
 
 
 #### File Naming
