@@ -23,7 +23,19 @@ describe('iam-based auth', () => {
             return token
         })
         decorateWithIamToken(mockEvent)
+    })
 
-        AWSMOCK.restore('RDS')
+    it('should apply PGPORT to the auth-token request', async () => {
+        const mockEvent = { USE_IAM_AUTH: true, PGPORT: 2345 }
+        const token = 'foo'
+        AWSMOCK.mock('RDS.Signer', 'getAuthToken', (options) => {
+            expect(options.port).to.equal(mockEvent.PGPORT)
+            return token
+        })
+        decorateWithIamToken(mockEvent)
+    })
+
+    afterEach(() => {
+        AWSMOCK.restore('RDS.Signer')
     })
 })
