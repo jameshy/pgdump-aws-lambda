@@ -93,7 +93,7 @@ Support for this can be enabled my making your Cloudwatch Event look like this.
 {
         "PGDATABASE": "dbname",
         "PGUSER": "postgres",
-        "USE_IAM_AUTH": "true",
+        "USE_IAM_AUTH": true,
         "PGHOST": "host",
         "S3_BUCKET" : "db-backups",
         "ROOT": "hourly-backups"
