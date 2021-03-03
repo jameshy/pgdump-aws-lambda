@@ -84,7 +84,8 @@ describe('Handler', () => {
         expect(s3Spy.calledOnce).to.be.true
         expect(s3Spy.firstCall.args).to.have.length(3)
         const config = s3Spy.firstCall.args[1]
-        expect(await config.PGPASSWORD.promise()).to.equal(token) // production code is synchronous, so this is annoying
+        // production code is synchronous, so this is annoying
+        expect(await config.PGPASSWORD.promise()).to.equal(token)
         AWSMOCK.restore('RDS')
     })
 
