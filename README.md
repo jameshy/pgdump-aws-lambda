@@ -91,13 +91,13 @@ Support for this can be enabled my making your Cloudwatch Event look like this.
 ```json
 
 {
-        "PGDATABASE": "dbname",
-        "PGUSER": "postgres",
-        "USE_IAM_AUTH": true,
-        "PGHOST": "host",
-        "S3_BUCKET" : "db-backups",
-        "ROOT": "hourly-backups"
-    }
+     "PGDATABASE": "dbname",
+     "PGUSER": "postgres",
+     "USE_IAM_AUTH": true,
+     "PGHOST": "host",
+     "S3_BUCKET" : "db-backups",
+     "ROOT": "hourly-backups"
+}
 ```
 
 If you supply `USE_IAM_AUTH` with a value of `true`, the `PGPASSWORD` var may be omitted in the CloudWatch event.
