@@ -103,8 +103,6 @@ Support for this can be enabled my making your Cloudwatch Event look like this.
 If you supply `USE_IAM_AUTH` with a value of `true`, the `PGPASSWORD` var may be omitted in the CloudWatch event.
 If you still provide it, it will be ignored.
 
-Don't forget to make sure that the lambda-execution-role thas the right IAM-rds policy attached to it.
-
 ## Developer
 
 #### Bundling a new `pg_dump` binary
