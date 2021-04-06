@@ -6,7 +6,10 @@ const mockDate = require('mockdate')
 const mockSpawn = require('mock-spawn')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
+const AWSMOCK = require('aws-sdk-mock')
+const AWS = require('aws-sdk')
 
+AWSMOCK.setSDKInstance(AWS)
 chai.should()
 chai.use(chaiAsPromised)
 
@@ -67,6 +70,23 @@ describe('Handler', () => {
         expect(result).to.equal(
             'mock-uploaded/2017-05-02/dbname-02-05-2017@01-33-11.backup'
         )
+    })
+
+    it('should be able to authenticate via IAM ', async () => {
+        const { s3Spy, pgSpy } = makeMockHandler()
+
+        const iamMockEvent = { ...mockEvent, USE_IAM_AUTH: true }
+        const token = 'foo'
+        AWSMOCK.mock('RDS.Signer', 'getAuthToken', token)
+        await handler(iamMockEvent)
+        // handler should have called pgSpy with correct arguments
+        expect(pgSpy.calledOnce).to.be.true
+        expect(s3Spy.calledOnce).to.be.true
+        expect(s3Spy.firstCall.args).to.have.length(3)
+        const config = s3Spy.firstCall.args[1]
+        // production code is synchronous, so this is annoying
+        expect(await config.PGPASSWORD.promise()).to.equal(token)
+        AWSMOCK.restore('RDS')
     })
 
     it('should upload the backup file and an iv file', async () => {
