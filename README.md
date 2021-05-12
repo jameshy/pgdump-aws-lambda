@@ -45,6 +45,15 @@ This function will store your backup with the following s3 key:
 
 s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
 
+#### Postgres Version
+
+To run with Postgres 12.5 pass in the PGDUMP_PATH config option into the event:
+```json
+{
+    "PGDUMP_PATH": "bin/postgres-12.5"
+}
+```
+
 #### AWS Firewall
 
 - If you run the Lambda function outside a VPC, you must enable public access to your database instance, a non VPC Lambda function executes on the public internet.
