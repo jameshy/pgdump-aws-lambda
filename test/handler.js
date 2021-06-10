@@ -86,7 +86,7 @@ describe('Handler', () => {
         const config = s3Spy.firstCall.args[1]
         // production code is synchronous, so this is annoying
         expect(await config.PGPASSWORD.promise()).to.equal(token)
-        AWSMOCK.restore('RDS')
+        AWSMOCK.restore('RDS.Signer')
     })
 
     it('should upload the backup file and an iv file', async () => {

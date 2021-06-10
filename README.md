@@ -11,15 +11,14 @@ It can be configured to run periodically using CloudWatch events.
 
 1. Create an AWS lambda function:
     - Author from scratch
-    - Runtime: Node.js 12.x
-2. Configuration -> Function code:
-    - Code Entry Type: Upload a .zip file
-        - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
-    - Basic Settings -> Timeout: 15 minutes
+    - Runtime: Node.js 14.x
+2. tab "Code" -> "Upload from" -> ".zip file":
+    - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
+    - tab "Configuration" -> "General Configuration" -> "Edit"
+        - Timeout: 15 minutes
+        - Edit the role and attach the policy "AmazonS3FullAccess"
     - Save
-3. Configuration -> Execution role
-    - Edit the role and attach the policy "AmazonS3FullAccess"
-4. Test
+3. Test
     - Create new test event, e.g.:
     ```json
     {
@@ -33,7 +32,7 @@ It can be configured to run periodically using CloudWatch events.
     ```
     - *Test* and check the output
 
-5. Create a CloudWatch rule:
+4. Create a CloudWatch rule:
     - Event Source: Schedule -> Fixed rate of 1 hour
     - Targets: Lambda Function (the one created in step #1)
     - Configure input -> Constant (JSON text) and paste your config (as per step #4)
@@ -93,10 +92,10 @@ Support for this can be enabled my making your Cloudwatch Event look like this.
 {
      "PGDATABASE": "dbname",
      "PGUSER": "postgres",
-     "USE_IAM_AUTH": true,
      "PGHOST": "host",
      "S3_BUCKET" : "db-backups",
-     "ROOT": "hourly-backups"
+     "ROOT": "hourly-backups",
+     "USE_IAM_AUTH": true
 }
 ```
 
@@ -107,13 +106,38 @@ If you still provide it, it will be ignored.
 
 #### Bundling a new `pg_dump` binary
 1. Launch an EC2 instance with the Amazon Linux 2 AMI
-2. Connect via SSH and [Install PostgreSQL using yum](https://stackoverflow.com/questions/55798856/deploy-postgres11-to-elastic-beanstalk-requires-etc-redhat-release).
-3. Locally, create a new directory for your pg_dump binaries: `mkdir bin/postgres-11.6`
-3. Copy the binaries
- - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/bin/pg_dump ./bin/postgres-11.6/pg_dump`
- - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/lib64/{libcrypt.so.1,libnss3.so,libsmime3.so,libssl3.so,libsasl2.so.3,liblber-2.4.so.2,libldap_r-2.4.so.2} ./bin/postgres-11.6/`
- - `scp -i <aws PEM> ec2-user@<EC2 Instance IP>:/usr/pgsql-11/lib/libpq.so.5 ./bin/postgres-11.6/libpq.so.5`
-4. When calling the handler, pass the environment variable `PGDUMP_PATH=postgres-11.6` to use the binaries in the bin/postgres-11.6 directory.
+2. Connect via SSH and:
+```bash
+
+# install postgres 13
+sudo amazon-linux-extras install epel
+
+sudo tee /etc/yum.repos.d/pgdg.repo<<EOF
+[pgdg13]
+name=PostgreSQL 13 for RHEL/CentOS 7 - x86_64
+baseurl=https://download.postgresql.org/pub/repos/yum/13/redhat/rhel-7-x86_64
+enabled=1
+gpgcheck=0
+EOF
+
+sudo yum install postgresql13 postgresql13-server
+
+exit
+```
+
+#### Download the binaries
+
+```bash
+scp -i ~/aws.pem ec2-user@18.157.84.236:/usr/bin/pg_dump ./bin/postgres-13.3/pg_dump
+scp -i ~/aws.pem ec2-user@18.157.84.236:/usr/lib64/{libcrypt.so.1,libnss3.so,libsmime3.so,libssl3.so,libsasl2.so.3,liblber-2.4.so.2,libldap_r-2.4.so.2} ./bin/postgres-13.3/
+scp -i ~/aws.pem ec2-user@18.157.84.236:/usr/pgsql-13/lib/libpq.so.5 ./bin/postgres-13.3/libpq.so.5
+```
+3. To use the new postgres binary pass PGDUMP_PATH in the event:
+```json
+{
+    "PGDUMP_PATH": "bin/postgres-13.3"
+}
+```
 
 #### Creating a new function zip
 
