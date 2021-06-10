@@ -92,10 +92,10 @@ Support for this can be enabled my making your Cloudwatch Event look like this.
 {
      "PGDATABASE": "dbname",
      "PGUSER": "postgres",
-     "USE_IAM_AUTH": true,
      "PGHOST": "host",
      "S3_BUCKET" : "db-backups",
-     "ROOT": "hourly-backups"
+     "ROOT": "hourly-backups",
+     "USE_IAM_AUTH": true
 }
 ```
 
@@ -132,7 +132,12 @@ scp -i ~/aws.pem ec2-user@18.157.84.236:/usr/bin/pg_dump ./bin/postgres-13.3/pg_
 scp -i ~/aws.pem ec2-user@18.157.84.236:/usr/lib64/{libcrypt.so.1,libnss3.so,libsmime3.so,libssl3.so,libsasl2.so.3,liblber-2.4.so.2,libldap_r-2.4.so.2} ./bin/postgres-13.3/
 scp -i ~/aws.pem ec2-user@18.157.84.236:/usr/pgsql-13/lib/libpq.so.5 ./bin/postgres-13.3/libpq.so.5
 ```
-3. When calling the handler, pass the environment variable `PGDUMP_PATH=postgres-13.3` to use the binaries in the bin/postgres-13.3 directory.
+3. To use the new postgres binary pass PGDUMP_PATH in the event:
+```json
+{
+    "PGDUMP_PATH": "bin/postgres-13.3"
+}
+```
 
 #### Creating a new function zip
 
