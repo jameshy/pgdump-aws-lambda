@@ -47,7 +47,7 @@ s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
 #### AWS Firewall
 
 - If you run the Lambda function outside a VPC, you must enable public access to your database instance, a non VPC Lambda function executes on the public internet.
-- If you run the Lambda function inside a VPC (not tested), you must allow access from the Lambda Security Group to your database instance. Also you must add a NAT gateway to your VPC so the Lambda can connect to S3.
+- If you run the Lambda function inside a VPC, you must allow access from the Lambda Security Group to your database instance. Also you must either add a NAT gateway ([chargeable](https://aws.amazon.com/vpc/pricing/)) to your VPC so the Lambda can connect to S3 over the Internet, or add an [S3 VPC endpoint (free)](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) and allow traffic to the appropriate S3 prefixlist.
 
 #### Encryption
 
