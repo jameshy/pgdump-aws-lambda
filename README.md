@@ -102,6 +102,36 @@ Support for this can be enabled my making your Cloudwatch Event look like this.
 If you supply `USE_IAM_AUTH` with a value of `true`, the `PGPASSWORD` var may be omitted in the CloudWatch event.
 If you still provide it, it will be ignored.
 
+#### SecretsManager-based Postgres authentication
+
+If you prefer to not send DB details/credentials in the event parameters, you can store such details in SecretsManager and just provide the SecretId, then the function will fetch your DB details/credentials from the secret value.
+
+NOTE: the execution role for the Lambda function must have access to GetSecretValue for the given secret.
+
+Support for this can be enabled by setting the SECRETS_MANAGER_SECRET_ID, so your Cloudwatch Event looks like this:
+
+```json
+
+{
+     "SECRETS_MANAGER_SECRET_ID": "my/secret/id",
+     "S3_BUCKET" : "db-backups",
+     "ROOT": "hourly-backups"
+}
+```
+
+If you supply `SECRETS_MANAGER_SECRET_ID`, you can ommit the 'PG*' keys, and they will be fetched from your SecretsManager secret value instead with the following mapping:
+
+| Secret Value  | PG-Key |
+| ------------- | ------------- |
+| username  | PGUSER  |
+| password  | PGPASSWORD  |
+| dbname  | PGDATABASE  |
+| host  | PGHOST  |
+| port  | PGPORT  |
+
+
+You can provide overrides in your event to any PG* keys as event parameters will take precedence over secret values.
+
 ## Developer
 
 #### Bundling a new `pg_dump` binary
