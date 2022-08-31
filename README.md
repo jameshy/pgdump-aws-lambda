@@ -10,7 +10,7 @@ Currently this function is deployed only on our development environment.
 
 The function receives the following JSON input from EventBridge:
 
-    ```json
+    ```
     {
         "PGDATABASE": "tia",
         "PGUSER": "tiadevelopment",
