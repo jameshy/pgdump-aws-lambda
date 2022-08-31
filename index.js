@@ -1,3 +1,5 @@
-const handler = require('./lib/handler')
+const backup = require("./lib/pgdump");
+const restore = require("./lib/pgrestore");
 
-module.exports.handler = handler
+module.exports.backup = backup;
+module.exports.restore = restore;

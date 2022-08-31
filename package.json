@@ -1,5 +1,5 @@
 {
-  "name": "pgdump-aws-lambda",
+  "name": "@milltechfx/pgdump-aws-lambda",
   "version": "1.4.1",
   "description": "Lambda function for executing pg_dump and streaming the output to s3.",
   "main": "index.js",
