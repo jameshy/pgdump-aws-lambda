@@ -10,15 +10,15 @@ Currently this function is deployed only on our development environment.
 
 The function receives the following JSON input from EventBridge:
 
-    ```
-    {
-        "PGDATABASE": "tia",
-        "PGUSER": "tiadevelopment",
-        "PGHOST": "rds-read-replica-development.crwg9lms4h1h.us-west-2.rds.amazonaws.com",
-        "S3_BUCKET" : "rds-dev-dumps",
-        "ROOT": "daily-backups"
-    }
-    ```
+```json
+{
+    "PGDATABASE": "tia",
+    "PGUSER": "tiadevelopment",
+    "PGHOST": "rds-read-replica-development.crwg9lms4h1h.us-west-2.rds.amazonaws.com",
+    "S3_BUCKET" : "rds-dev-dumps",
+    "ROOT": "daily-backups"
+}
+```
 
 ROOT stands for the S3 folder that the dump will be placed on.
 The database password is passed as a environment variable on the lambda console.
