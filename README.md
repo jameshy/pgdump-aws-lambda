@@ -27,7 +27,7 @@ The database password is passed as a environment variable on the lambda console.
 
 ## Schedule
 
-The function runs once a day at 00:00 UTC
+The function runs once a day at 06:00 UTC
 
 To modify the schedule, go to the function UI, click EventBridge and modify the rule.
 
