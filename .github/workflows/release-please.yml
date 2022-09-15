@@ -1,0 +1,38 @@
+on:
+  push:
+    branches:
+      - main
+      
+name: release-please
+
+permissions: write-all
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: node
+          package-name: test-release-pleasex
+
+      - uses: actions/checkout@v3
+        if: ${{ steps.release.outputs.release_created }}
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@milltechfx'
+        if: ${{ steps.release.outputs.release_created }}
+        
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: ${{ steps.release.outputs.release_created }}
+
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ steps.release.outputs.release_created }}
