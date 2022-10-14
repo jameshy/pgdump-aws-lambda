@@ -89,6 +89,34 @@ describe('Handler', () => {
         AWSMOCK.restore('RDS.Signer')
     })
 
+    it('should be able to authenticate via SecretsManager', async () => {
+        const { s3Spy, pgSpy } = makeMockHandler()
+
+        const secretsManagerMockEvent = { ...mockEvent, SECRETS_MANAGER_SECRET_ID: 'my-secret-id' }
+        const username = 'myuser'
+        const password = 'mypassword'
+        const secretValue = {
+            SecretString: JSON.stringify({ username, password })
+        }
+
+        AWSMOCK.mock('SecretsManager', 'getSecretValue', (params, callback) => {
+            expect(params.SecretId).to.eql(secretsManagerMockEvent.SECRETS_MANAGER_SECRET_ID)
+            callback(null, secretValue)
+        })
+
+        await handler(secretsManagerMockEvent)
+        // handler should have called pgSpy with correct arguments
+        expect(pgSpy.calledOnce).to.be.true
+        expect(s3Spy.calledOnce).to.be.true
+        expect(s3Spy.firstCall.args).to.have.length(3)
+        const config = s3Spy.firstCall.args[1]
+        // production code is synchronous, so this is annoying
+        expect(config.PGUSER).to.equal(username)
+        expect(config.PGPASSWORD).to.equal(password)
+
+        AWSMOCK.restore('SecretsManager')
+    })
+
     it('should upload the backup file and an iv file', async () => {
         const { s3Spy } = makeMockHandler()
 
