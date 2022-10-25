@@ -26,7 +26,7 @@ cp -R * $BUNDLE_DIR/
 pushd $BUNDLE_DIR > /dev/null
 echo "cleaning.."
 rm -rf node_modules/*
-npm install --production --no-progress > /dev/null
+npm install --omit=dev --no-progress > /dev/null
 rm -rf dist coverage test
 
 # create zip of bundle/
