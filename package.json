@@ -30,7 +30,7 @@
     "coverage": "NODE_ENV=test nyc --reporter=text mocha test",
     "coveralls": "NODE_ENV=test nyc --reporter=text-lcov mocha test | coveralls",
     "coverage-html": "NODE_ENV=test nyc --reporter=html --reporter=text mocha test",
-    "deploy": "bin/makezip.sh"
+    "makezip": "bin/makezip.sh"
   },
   "repository": {
     "type": "git",
