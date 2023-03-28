@@ -92,6 +92,16 @@ openssl enc -aes-256-cbc -d \
 -iv $(< postgres-27-12-2019@13-19-13.backup.iv)
 ```
 
+#### S3 Upload Part Size
+
+If you experience lamba timeouts while uploading file parts to S3 you can try increasing the part size of each file chunk (might need to increase lambda resources). For instance on a 2GB file using the default part size of 5MB would result on ~400 parts, pushing all this parts was exceeding the 15min timeout for lambdas, by increasing the part size to 1GB the transmit time was reduced to ~3 mintes.
+
+```json
+{
+    "S3_PART_SIZE": 1073741824,
+}
+```
+
 #### IAM-based Postgres authentication
 
 Your context may require that you use IAM-based authentication to log into the Postgres service.
