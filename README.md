@@ -11,7 +11,7 @@ It can be configured to run periodically using CloudWatch events.
 
 1. Create an AWS lambda function:
     - Author from scratch
-    - Runtime: Node.js 16.x
+    - Runtime: Node.js 18.x
     - Architecture: x86_64
 2. tab "Code" -> "Upload from" -> ".zip file":
     - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
