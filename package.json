@@ -5,7 +5,10 @@
     "main": "index.js",
     "dependencies": {
         "moment": "2.29.4",
-        "aws-sdk": "^2.6"
+        "@aws-sdk/client-secrets-manager": "^3.599.0",
+        "@aws-sdk/lib-storage": "^3.598.0",
+        "@aws-sdk/client-s3": "^3.598.0",
+        "@aws-sdk/rds-signer":"3.598.0" 
     },
     "devDependencies": {
         "aws-sdk-mock": "5.8.0",
