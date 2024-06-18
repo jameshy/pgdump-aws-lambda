@@ -1,52 +1,52 @@
 {
-  "name": "pgdump-aws-lambda",
-  "version": "1.5.1",
-  "description": "Lambda function for executing pg_dump and streaming the output to s3.",
-  "main": "index.js",
-  "dependencies": {
-    "moment": "2.29.4"
-  },
-  "devDependencies": {
-    "aws-sdk": "2.1240.0",
-    "aws-sdk-mock": "5.8.0",
-    "chai": "4.3.6",
-    "chai-as-promised": "7.1.1",
-    "coveralls": "3.1.1",
-    "eslint": "8.26.0",
-    "eslint-config-airbnb": "19.0.4",
-    "eslint-config-airbnb-base": "15.0.0",
-    "eslint-plugin-import": "2.26.0",
-    "mocha": "10.1.0",
-    "mock-spawn": "0.2.6",
-    "mockdate": "3.0.5",
-    "nyc": "15.1.0",
-    "rewire": "6.0.0",
-    "sinon": "14.0.1",
-    "tmp": "0.2.1"
-  },
-  "scripts": {
-    "test": "NODE_ENV=test mocha test",
-    "test:watch": "NODE_ENV=test mocha test -w",
-    "coverage": "NODE_ENV=test nyc --reporter=text mocha test",
-    "coveralls": "NODE_ENV=test nyc --reporter=text-lcov mocha test | coveralls",
-    "coverage-html": "NODE_ENV=test nyc --reporter=html --reporter=text mocha test",
-    "makezip": "bin/makezip.sh"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jameshy/pgdump-aws-lambda.git"
-  },
-  "keywords": [
-    "lambda",
-    "s3",
-    "pg_dump",
-    "postgresql",
-    "backup"
-  ],
-  "author": "James Hutchby",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jameshy/pgdump-aws-lambda/issues"
-  },
-  "homepage": "https://github.com/jameshy/pgdump-aws-lambda#readme"
+    "name": "pgdump-aws-lambda",
+    "version": "1.5.1",
+    "description": "Lambda function for executing pg_dump and streaming the output to s3.",
+    "main": "index.js",
+    "dependencies": {
+        "moment": "2.29.4",
+        "aws-sdk": "^2.6"
+    },
+    "devDependencies": {
+        "aws-sdk-mock": "5.8.0",
+        "chai": "4.3.6",
+        "chai-as-promised": "7.1.1",
+        "coveralls": "3.1.1",
+        "eslint": "8.26.0",
+        "eslint-config-airbnb": "19.0.4",
+        "eslint-config-airbnb-base": "15.0.0",
+        "eslint-plugin-import": "2.26.0",
+        "mocha": "10.1.0",
+        "mock-spawn": "0.2.6",
+        "mockdate": "3.0.5",
+        "nyc": "15.1.0",
+        "rewire": "6.0.0",
+        "sinon": "14.0.1",
+        "tmp": "0.2.1"
+    },
+    "scripts": {
+        "test": "NODE_ENV=test mocha test",
+        "test:watch": "NODE_ENV=test mocha test -w",
+        "coverage": "NODE_ENV=test nyc --reporter=text mocha test",
+        "coveralls": "NODE_ENV=test nyc --reporter=text-lcov mocha test | coveralls",
+        "coverage-html": "NODE_ENV=test nyc --reporter=html --reporter=text mocha test",
+        "makezip": "bin/makezip.sh"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jameshy/pgdump-aws-lambda.git"
+    },
+    "keywords": [
+        "lambda",
+        "s3",
+        "pg_dump",
+        "postgresql",
+        "backup"
+    ],
+    "author": "James Hutchby",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/jameshy/pgdump-aws-lambda/issues"
+    },
+    "homepage": "https://github.com/jameshy/pgdump-aws-lambda#readme"
 }
