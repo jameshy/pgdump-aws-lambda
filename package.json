@@ -4,10 +4,10 @@
   "description": "Lambda function for executing pg_dump and streaming the output to s3.",
   "main": "index.js",
   "dependencies": {
+    "aws-sdk": "^2.1603.0",
     "moment": "2.29.4"
   },
   "devDependencies": {
-    "aws-sdk": "2.1240.0",
     "aws-sdk-mock": "5.8.0",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
