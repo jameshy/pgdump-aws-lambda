@@ -20,11 +20,10 @@ It can be configured to run periodically using CloudWatch events.
         - Edit the role and attach the policy "AmazonS3FullAccess"
     - Save
 3. Give your lambda permissions permissions to write to S3:
-
     - tab "Configuration" -> "Permissions"
     - click the existing Execution role
     - "Add permissions" -> "Attach policies"
-    - select "AmazonS3FullAccess" and click "Attach policies"
+    - select "AmazonS3FullAccess" and click "Add Permissions"
 
 4. Test
 
@@ -94,7 +93,7 @@ openssl enc -aes-256-cbc -d \
 
 #### S3 Upload Part Size
 
-If you experience lamba timeouts while uploading file parts to S3 you can try increasing the part size of each file chunk (might need to increase lambda resources). For instance on a 2GB file using the default part size of 5MB would result on ~400 parts, pushing all this parts was exceeding the 15min timeout for lambdas, by increasing the part size to 1GB the transmit time was reduced to ~3 mintes.
+If you experience lamba timeouts while uploading file parts to S3 you can try increasing the part size of each file chunk (might need to increase lambda resources). For instance on a 2GB file using the default part size of 5MB would result on ~400 parts, pushing all this parts was exceeding the 15min timeout for lambdas, by increasing the part size to 1GB the transmit time was reduced to ~3 minutes.
 
 ```json
 {
@@ -191,7 +190,7 @@ exit
 ```bash
 mkdir bin/postgres-16.3
 scp ec2-user@your-ec2-server:/usr/local/pgsql/bin/pg_dump ./bin/postgres-16.3/pg_dump
-scp ec2-user@your-ec2-server-address:/usr/local/pgsql/lib/libpq.so.5 ./bin/postgres-16.3/libpq.so.5
+scp ec2-user@your-ec2-server:/usr/local/pgsql/lib/libpq.so.5 ./bin/postgres-16.3/libpq.so.5
 ```
 
 3. To use the new postgres binary pass PGDUMP_PATH in the event:
