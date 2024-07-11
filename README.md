@@ -139,6 +139,23 @@ If you supply `SECRETS_MANAGER_SECRET_ID`, you can ommit the 'PG\*' keys, and th
 
 You can provide overrides in your event to any PG\* keys as event parameters will take precedence over secret values.
 
+#### Multiple databases
+
+If you'd like to export multiple databases in a single event, you can add a comma-separated list of database names to the PGDATABASE setting. The results will return in a list.
+
+```json
+{
+    "PGDATABASE": "dbname1,dbname2,dbname3",
+    "PGUSER": "postgres",
+    "PGPASSWORD": "password",
+    "PGHOST": "host",
+    "S3_BUCKET": "db-backups",
+    "ROOT": "hourly-backups"
+}
+```
+
+NOTE: The 15 minute timeout for lambda still applies.
+
 ## Developer
 
 #### Bundling a new `pg_dump` binary
