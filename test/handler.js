@@ -72,6 +72,60 @@ describe('Handler', () => {
         )
     })
 
+    it('should support multiple database names', async () => {
+        const mockEvent = {
+            PGDATABASE: 'dbone, dbtwo',
+            S3_BUCKET: 's3bucket'
+        }
+        const { s3Spy, pgSpy } = makeMockHandler()
+
+        const result = await handler(mockEvent)
+
+        // handler should have called pgSpy twice (both databases, with correct arguments
+        expect(pgSpy.calledTwice).to.be.true
+        {
+            // first call
+            expect(pgSpy.firstCall.args).to.have.length(1)
+            const [event] = pgSpy.firstCall.args
+            expect(event.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+            expect(event.PGDATABASE).to.equal('dbone')
+        }
+        {
+            // second call
+            expect(pgSpy.secondCall.args).to.have.length(1)
+            const [event] = pgSpy.secondCall.args
+            expect(event.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+            expect(event.PGDATABASE).to.equal('dbtwo')
+        }
+
+        // handler should have called s3spy twice (both databases, with correct arguments
+        expect(s3Spy.calledTwice).to.be.true
+        {
+            // first call
+            expect(s3Spy.firstCall.args).to.have.length(3)
+            const [stream, config, key] = s3Spy.firstCall.args
+            expect(stream).to.be.ok
+            expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+            expect(config.PGDATABASE).to.equal('dbone')
+            expect(key).to.equal('2017-05-02/dbone-02-05-2017@01-33-11.backup')
+        }
+        {
+            // second call
+            expect(s3Spy.secondCall.args).to.have.length(3)
+            const [stream, config, key] = s3Spy.secondCall.args
+            expect(stream).to.be.ok
+            expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
+            expect(config.PGDATABASE).to.equal('dbtwo')
+            expect(key).to.equal('2017-05-02/dbtwo-02-05-2017@01-33-11.backup')
+        }
+
+        // result should be an array with two backup paths
+        expect(result).deep.to.equal([
+            'mock-uploaded/2017-05-02/dbone-02-05-2017@01-33-11.backup',
+            'mock-uploaded/2017-05-02/dbtwo-02-05-2017@01-33-11.backup'
+        ])
+    })
+
     it('should be able to authenticate via IAM ', async () => {
         const { s3Spy, pgSpy } = makeMockHandler()
 
@@ -161,7 +215,18 @@ describe('Handler', () => {
 
         return handler(event)
             .should.be.rejectedWith(
-                /PGDATABASE not provided in the event data/
+                /PGDATABASE was not provided/
+            )
+    })
+    
+    it('should throw an error when PGDATABASE is an empty array', () => {
+        makeMockHandler()
+        const event = { ...mockEvent }
+        event.PGDATABASE = ","
+
+        return handler(event)
+            .should.be.rejectedWith(
+                /PGDATABASE does not contain a database/
             )
     })
 
