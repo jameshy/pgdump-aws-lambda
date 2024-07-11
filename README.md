@@ -11,7 +11,7 @@ It can be configured to run periodically using CloudWatch events.
 
 1. Create an AWS lambda function:
     - Author from scratch
-    - Runtime: Node.js 18.x
+    - Runtime: Node.js 20.x
     - Architecture: x86_64
 2. tab "Code" -> "Upload from" -> ".zip file":
     - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
@@ -170,40 +170,35 @@ NOTE: The 15 minute timeout for lambda still applies.
 
 #### Bundling a new `pg_dump` binary
 
-1. Launch an EC2 instance with the Amazon Linux 2 AMI
+1. Launch an EC2 instance with the Amazon Linux 2023 AMI (ami-0649bea3443ede307)
 2. Connect via SSH and:
 
 ```bash
 
-# install postgres 15
-sudo amazon-linux-extras install epel
+# install postgres from source
 
-sudo tee /etc/yum.repos.d/pgdg.repo<<EOF
-[pgdg15]
-name=PostgreSQL 15 for RHEL/CentOS 7 - x86_64
-baseurl=https://download.postgresql.org/pub/repos/yum/15/redhat/rhel-7-x86_64
-enabled=1
-gpgcheck=0
-EOF
-
-sudo yum install postgresql15 postgresql15-server
-
+wget https://ftp.postgresql.org/pub/source/v16.3/postgresql-16.3.tar.gz
+tar zxf postgresql-16.3.tar.gz
+cd postgresql-16.3
+./configure
+make
+make install
 exit
 ```
 
 #### Download the binaries
 
 ```bash
-scp ec2-user@your-ec2-hostname:/usr/bin/pg_dump ./bin/postgres-15.0/pg_dump
-scp ec2-user@your-ec2-hostname:/usr/lib64/{libcrypt.so.1,libnss3.so,libsmime3.so,libssl3.so,libsasl2.so.3,liblber-2.4.so.2,libldap_r-2.4.so.2} ./bin/postgres-15.0/
-scp ec2-user@your-ec2-hostname:/usr/pgsql-15/lib/libpq.so.5 ./bin/postgres-15.0/libpq.so.5
+mkdir bin/postgres-16.3
+scp ec2-user@your-ec2-server:/usr/local/pgsql/bin/pg_dump ./bin/postgres-16.3/pg_dump
+scp ec2-user@your-ec2-server-address:/usr/local/pgsql/lib/libpq.so.5 ./bin/postgres-16.3/libpq.so.5
 ```
 
 3. To use the new postgres binary pass PGDUMP_PATH in the event:
 
 ```json
 {
-    "PGDUMP_PATH": "bin/postgres-15.0"
+    "PGDUMP_PATH": "bin/postgres-16.3"
 }
 ```
 
