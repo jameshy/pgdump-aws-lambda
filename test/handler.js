@@ -66,9 +66,9 @@ describe('Handler', () => {
         expect(stream).to.be.ok
         expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
         expect(config.PGDATABASE).to.equal(mockEvent.PGDATABASE)
-        expect(key).to.equal('2017-05-02/dbname-02-05-2017@01-33-11.backup')
+        expect(key).to.equal('2017-05-02/dbname-02-05-2017_01-33-11.backup')
         expect(result).to.equal(
-            'mock-uploaded/2017-05-02/dbname-02-05-2017@01-33-11.backup'
+            'mock-uploaded/2017-05-02/dbname-02-05-2017_01-33-11.backup'
         )
     })
 
@@ -107,7 +107,7 @@ describe('Handler', () => {
             expect(stream).to.be.ok
             expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
             expect(config.PGDATABASE).to.equal('dbone')
-            expect(key).to.equal('2017-05-02/dbone-02-05-2017@01-33-11.backup')
+            expect(key).to.equal('2017-05-02/dbone-02-05-2017_01-33-11.backup')
         }
         {
             // second call
@@ -116,13 +116,13 @@ describe('Handler', () => {
             expect(stream).to.be.ok
             expect(config.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
             expect(config.PGDATABASE).to.equal('dbtwo')
-            expect(key).to.equal('2017-05-02/dbtwo-02-05-2017@01-33-11.backup')
+            expect(key).to.equal('2017-05-02/dbtwo-02-05-2017_01-33-11.backup')
         }
 
         // result should be an array with two backup paths
         expect(result).deep.to.equal([
-            'mock-uploaded/2017-05-02/dbone-02-05-2017@01-33-11.backup',
-            'mock-uploaded/2017-05-02/dbtwo-02-05-2017@01-33-11.backup'
+            'mock-uploaded/2017-05-02/dbone-02-05-2017_01-33-11.backup',
+            'mock-uploaded/2017-05-02/dbtwo-02-05-2017_01-33-11.backup'
         ])
     })
 
@@ -193,18 +193,18 @@ describe('Handler', () => {
         expect(config.PGDATABASE).to.equal(mockEvent.PGDATABASE)
         expect(key).to.be.a.string
         expect(key).to.not.be.empty
-        expect(key).to.equal('2017-05-02/dbname-02-05-2017@01-33-11.backup.iv')
+        expect(key).to.equal('2017-05-02/dbname-02-05-2017_01-33-11.backup.iv')
 
         // second call is the backup
         const [stream2, config2, key2] = s3Spy.secondCall.args
         expect(stream2).to.be.ok
         expect(config2.S3_BUCKET).to.equal(mockEvent.S3_BUCKET)
         expect(config2.PGDATABASE).to.equal(mockEvent.PGDATABASE)
-        expect(key2).to.equal('2017-05-02/dbname-02-05-2017@01-33-11.backup')
+        expect(key2).to.equal('2017-05-02/dbname-02-05-2017_01-33-11.backup')
 
         // handler should return the backup path
         expect(result).to.equal(
-            'mock-uploaded/2017-05-02/dbname-02-05-2017@01-33-11.backup'
+            'mock-uploaded/2017-05-02/dbname-02-05-2017_01-33-11.backup'
         )
     })
 
