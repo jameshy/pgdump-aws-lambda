@@ -51,7 +51,7 @@ It can be configured to run periodically using CloudWatch events.
 
 This function will store your backup with the following s3 key:
 
-s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD@HH-mm-ss.backup
+s3://${S3_BUCKET}${ROOT}/YYYY-MM-DD/YYYY-MM-DD_HH-mm-ss.backup
 
 #### AWS Firewall
 
