@@ -179,7 +179,7 @@ sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-dev
 wget https://ftp.postgresql.org/pub/source/v16.3/postgresql-16.3.tar.gz
 tar zxf postgresql-16.3.tar.gz
 cd postgresql-16.3
-./configure
+./configure --with-ssl=openssl
 make
 make install
 exit
