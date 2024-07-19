@@ -173,9 +173,9 @@ NOTE: The 15 minute timeout for lambda still applies.
 2. Connect via SSH and:
 
 ```bash
-
-# install postgres from source
-
+# install packages required for building
+sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-devel libicu-devel
+# build and install postgres from source
 wget https://ftp.postgresql.org/pub/source/v16.3/postgresql-16.3.tar.gz
 tar zxf postgresql-16.3.tar.gz
 cd postgresql-16.3
