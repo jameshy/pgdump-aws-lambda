@@ -181,7 +181,7 @@ tar zxf postgresql-16.3.tar.gz
 cd postgresql-16.3
 ./configure --with-ssl=openssl
 make
-make install
+sudo make install
 exit
 ```
 
