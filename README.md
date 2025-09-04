@@ -174,7 +174,7 @@ NOTE: The 15 minute timeout for lambda still applies.
 
 ```bash
 # install packages required for building
-sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-devel libicu-devel
+sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-devel libicu-devel bison flex perl-FindBin perl-lib
 # build and install postgres from source
 wget https://ftp.postgresql.org/pub/source/v16.3/postgresql-16.3.tar.gz
 tar zxf postgresql-16.3.tar.gz
