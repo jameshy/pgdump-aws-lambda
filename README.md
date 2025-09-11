@@ -189,8 +189,8 @@ exit
 
 ```bash
 mkdir bin/postgres-17.5
-scp ec2-user@your-ec2-server:/usr/local/pgsql/bin/pg_dump ./bin/postgres-17.5/pg_dump
-scp ec2-user@your-ec2-server:/usr/local/pgsql/lib/libpq.so.5 ./bin/postgres-17.5/libpq.so.5
+scp ec2-user@your-ec2-server:/usr/local/pgsql/bin/pg_{dump,restore} ./bin/postgres-17.5/
+scp ec2-user@your-ec2-server:/usr/local/pgsql/lib/libpq.so.5 ./bin/postgres-17.5/
 ```
 
 3. To use the new postgres binary pass PGDUMP_PATH in the event:
