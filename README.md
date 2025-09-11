@@ -174,11 +174,11 @@ NOTE: The 15 minute timeout for lambda still applies.
 
 ```bash
 # install packages required for building
-sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-devel libicu-devel
+sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-devel libicu-devel bison flex perl-FindBin perl-lib
 # build and install postgres from source
-wget https://ftp.postgresql.org/pub/source/v16.3/postgresql-16.3.tar.gz
-tar zxf postgresql-16.3.tar.gz
-cd postgresql-16.3
+wget https://ftp.postgresql.org/pub/source/v17.5/postgresql-17.5.tar.gz
+tar zxf postgresql-17.5.tar.gz
+cd postgresql-17.5
 ./configure --with-ssl=openssl
 make
 sudo make install
@@ -188,16 +188,16 @@ exit
 #### Download the binaries
 
 ```bash
-mkdir bin/postgres-16.3
-scp ec2-user@your-ec2-server:/usr/local/pgsql/bin/pg_dump ./bin/postgres-16.3/pg_dump
-scp ec2-user@your-ec2-server:/usr/local/pgsql/lib/libpq.so.5 ./bin/postgres-16.3/libpq.so.5
+mkdir bin/postgres-17.5
+scp ec2-user@your-ec2-server:/usr/local/pgsql/bin/pg_{dump,restore} ./bin/postgres-17.5/
+scp ec2-user@your-ec2-server:/usr/local/pgsql/lib/libpq.so.5 ./bin/postgres-17.5/
 ```
 
 3. To use the new postgres binary pass PGDUMP_PATH in the event:
 
 ```json
 {
-    "PGDUMP_PATH": "bin/postgres-16.3"
+    "PGDUMP_PATH": "bin/postgres-17.5"
 }
 ```
 
