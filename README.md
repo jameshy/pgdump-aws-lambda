@@ -11,7 +11,7 @@ It can be configured to run periodically using CloudWatch events.
 
 1. Create an AWS lambda function:
     - Author from scratch
-    - Runtime: Node.js 20.x
+    - Runtime: Node.js 24.x
     - Architecture: x86_64
 2. tab "Code" -> "Upload from" -> ".zip file":
     - Upload ([pgdump-aws-lambda.zip](https://github.com/jameshy/pgdump-aws-lambda/releases/latest))
@@ -174,13 +174,13 @@ NOTE: The 15 minute timeout for lambda still applies.
 
 ```bash
 # install packages required for building
-sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-devel libicu-devel
+sudo dnf install make automake gcc gcc-c++ readline-devel zlib-devel openssl-devel libicu-devel bison flex perl-core
 # build and install postgres from source
-wget https://ftp.postgresql.org/pub/source/v16.3/postgresql-16.3.tar.gz
-tar zxf postgresql-16.3.tar.gz
-cd postgresql-16.3
+wget https://ftp.postgresql.org/pub/source/v18.1/postgresql-18.1.tar.gz
+tar zxvf postgresql-18.1.tar.gz
+cd postgresql-18.1
 ./configure --with-ssl=openssl
-make
+make -j 2
 sudo make install
 exit
 ```
