@@ -36,11 +36,13 @@ It can be configured to run periodically using CloudWatch events.
         "PGPASSWORD": "password",
         "PGHOST": "host",
         "S3_BUCKET": "db-backups",
+        "S3_REGION": "eu-west-1",
         "ROOT": "hourly-backups"
     }
     ```
 
     - _Test_ and check the output
+    - _Hint: the default S3 region is configured to eu-west-1, you need to explicitly override `S3_REGION`_
 
 5. Create a CloudWatch rule:
     - Event Source: Schedule -> Fixed rate of 1 hour
